@@ -1,0 +1,9 @@
+# ejecutables
+*.exe
+*.o
+
+# configuracion local
+.vscode/
+
+# archivos temporales o antiguos
+notas.txt
