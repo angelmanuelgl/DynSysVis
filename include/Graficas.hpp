@@ -20,6 +20,10 @@
 #include <algorithm>
 #include "Geometria.hpp" // Para que reconozca la clase Panel
 
+struct Limites {
+    float minX, maxX, minY, maxY;
+};
+
 class GraficaBase {
 protected:
     unsigned int maxPoints;
@@ -32,66 +36,64 @@ protected:
     std::string unidadEjeX, unidadEjeY;
     int numMarcasX, numMarcasY;
     
-    bool mostrarEtiquetasEjes;
+
     float tamanoTitulo;
+
+    // efectos 
+        
+    bool mostrarEtiquetasEjes; 
+    bool sombreado;
+    bool desvanece;
+
+    std::vector<sf::Vector2f> puntos; //  pares (x, y)
+    Limites lim;
 
 public:
     GraficaBase(unsigned int maxPts, sf::Color color, std::string t, const std::string& ruta_fuente = "fonts/Roboto.ttf");
 
     virtual ~GraficaBase() {}
 
-    // IMPORTANTE: metodos que las graficas  hija DEBE implementar 
-    virtual std::string getEtiquetaY(int indice) = 0;
-    virtual std::string getEtiquetaX(int indice) = 0;
-    virtual void dibujarContenido(sf::RenderWindow& window, sf::RenderStates states, float paddingL, float offsetTop, float graphWidth, float graphHeight) = 0;
+    // neceistan implementar las hijas, solo por peroosnalziacion
+    virtual void recalcularExtremos(void) = 0;
+
+    // preproceso
+    std::string getEtiquetaY(int indice);
+    std::string getEtiquetaX(int indice);
 
     // --- estilo ---
     void setMostrarEtiquetas(bool mostrar) { mostrarEtiquetasEjes = mostrar; }
     void setTamanoTitulo(float tam) { tamanoTitulo = tam; titulo_texto.setCharacterSize((unsigned int)tamanoTitulo); }
     void configurarEjes(std::string nx, std::string ux, std::string ny, std::string uy) { nombreEjeX = nx; unidadEjeX = ux; nombreEjeY = ny; unidadEjeY = uy; }
     void configurarMarcas(int mx, int my) { numMarcasX = mx; numMarcasY = my; }
-
+    //
+    void ponerSobreado( bool s ){ sombreado = s;}
+    void ponerDesvanecido( bool s ){ desvanece = s;}
+    
+    // dibujar
+    void dibujarContenido(sf::RenderWindow& window, sf::RenderStates states, float paddingL, float offsetTop, float graphWidth, float graphHeight);
     void draw(sf::RenderWindow& window, Panel& parent);
 };
 
 class GraficaTiempo : public GraficaBase {
 private:
-    std::vector<float> datos;
     float contadorSegundos;
-    bool sombreado;
-
+    
 public:
     GraficaTiempo(unsigned int maxPts, sf::Color color, std::string t, const std::string& ruta_fuente = "fonts/Roboto.ttf");
-
+    // --- datos ---
+    void recalcularExtremos(void) override;
     void addValue(float val);
-
-    // ---  etiquetas para tiempo y eje y---
-    std::string getEtiquetaY(int i) override;
-    std::string getEtiquetaX(int i) override;
-
-    // --- aqui en la grafica hija se completa --- 
-    void dibujarContenido(sf::RenderWindow& window, sf::RenderStates states, float paddingL, float offsetTop, float graphWidth, float graphHeight) override;
-
-    // estilo
-    void ponerSobreado( bool s );
 };
 
 class GraficaEspacioFase : public GraficaBase {
 private:
-    std::vector<sf::Vector2f> puntos; //  pares (x, y)
+    //
 
 public:
     GraficaEspacioFase(unsigned int maxPts, sf::Color color, std::string t, const std::string& ruta_fuente = "fonts/Roboto.ttf");
-
     // --- datos ---
+    void recalcularExtremos(void) override;
     void addValue(float x, float y);
-
-    // --- etiquetas para espacio Fase ---
-    std::string getEtiquetaY(int i) override;
-    std::string getEtiquetaX(int i) override;
-
-    // --- dibujo ---
-    void dibujarContenido(sf::RenderWindow& window, sf::RenderStates states, float paddingL, float offsetTop, float graphWidth, float graphHeight) override;
 };
 
 #endif

@@ -26,7 +26,17 @@ int main( ){
     settings.antialiasingLevel = 8;
 
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
-    sf::RenderWindow window(desktop,  "Simulacion de Colonia de Hormigas - Tesis",  sf::Style::Fullscreen, settings);
+
+    unsigned int ancho = static_cast<unsigned int>(desktop.width * 0.8f);
+    unsigned int alto = static_cast<unsigned int>(desktop.height * 0.8f);
+    sf::RenderWindow window(sf::VideoMode(ancho, alto), 
+                        "Simulacion de Colonia de Hormigas - Tesis", 
+                        sf::Style::Fullscreen, 
+                        settings);
+    // window.setPosition(sf::Vector2i(
+    //     (desktop.width - ancho) / 2,
+    //     (desktop.height - alto) / 2
+    // ));
 
     window.setFramerateLimit(60);
 
@@ -47,12 +57,12 @@ int main( ){
     const float dG = 0.02f;      // muerte Guerreras
     const float dR = 0.05f;      // muerte Recolectoras
 
-    // ---  INterfaz ---
+    // ---  Interfaz ---
     float espaciado = 25.f; // epacio entre paneles
     float margenVentana = 20.f;
 
     // --- Guerreras G(t) ----
-    Panel panelG({350, 200}, 20, sf::Color(30, 60, 30), sf::Color(0, 255, 255));
+    Panel panelG({350, 200}, 20, sf::Color(30, 30, 30), sf::Color::Cyan);
     panelG.positionAbsoluta(Ubicacion::CentroDer, window, margenVentana);
     GraficaTiempo graphG(100, sf::Color::Cyan, "Poblacion de Guerreras G(t)");
 
@@ -65,12 +75,18 @@ int main( ){
     Panel panelO({350, 200}, 20, sf::Color(30, 30, 30), sf::Color(100, 0, 255));
     panelO.positionRelativa(RelativoA::Abajo, panelG, espaciado);
     GraficaTiempo graphO(100, sf::Color(100, 0, 255), "Poblacion de Obreras O(t)");
-    graphO.ponerSobreado(false);
+    //graphO.ponerSobreado(false);
 
     // --- boceto de fase ---
     Panel nuevoPanel({350, 200}, 20, sf::Color(30, 30, 30), sf::Color(100, 0, 255));
     nuevoPanel.positionAbsoluta(Ubicacion::CentroIzq, window, margenVentana);
     GraficaEspacioFase nuevaGrafica(100, sf::Color(100, 0, 255), "(Obreras, Guerreras)");
+
+    // --- boceto de fase ---
+    Panel nuevoPanel2({350, 200}, 20, sf::Color(30, 30, 30), sf::Color(255, 150, 150));
+    nuevoPanel2.positionRelativa(RelativoA::Arriba  , nuevoPanel, espaciado);
+    GraficaEspacioFase nuevaGrafica2(100, sf::Color(255, 150, 150), "(Obreras, Recolectoras)");
+
 
     // --- IMPORTANTE: control del tiempo --
     //  (Paso fijo de 0.1s)
@@ -108,6 +124,7 @@ int main( ){
             graphR.addValue(R);
             graphO.addValue(O);
             nuevaGrafica.addValue(O,G);
+            nuevaGrafica2.addValue(O,R);
 
             accumulator -= ups;
         }
@@ -128,7 +145,8 @@ int main( ){
         nuevoPanel.draw(window);
         nuevaGrafica.draw(window, nuevoPanel);
 
-        
+        nuevoPanel2.draw(window);
+        nuevaGrafica2.draw(window, nuevoPanel2);
 
         window.display();
     }

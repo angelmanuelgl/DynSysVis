@@ -27,13 +27,134 @@ GraficaBase::GraficaBase(unsigned int maxPts, sf::Color color, std::string t, co
     titulo_texto.setString(titulo);
     titulo_texto.setCharacterSize(tamanoTitulo);
     titulo_texto.setFillColor(sf::Color::White);
-
+    
+    // ejes
     nombreEjeX = "Eje X"; nombreEjeY = "Eje Y";
     unidadEjeX = "u"; unidadEjeY = "u";
     numMarcasX = 5; numMarcasY = 4;
+    
+    // detalles
     mostrarEtiquetasEjes = false;
+    sombreado = false;
+    desvanece = false;
+
+    lim = {0,0,0,0};
 }
 
+void GraficaBase::dibujarContenido(sf::RenderWindow& window, sf::RenderStates states, float paddingL, float offsetTop, float graphWidth, float graphHeight ){
+    if( puntos.empty()) return;
+
+    // --- auto escala -- 
+    recalcularExtremos();
+  
+
+    // --- normalizacion ---
+    // pasar a coordenadas de pantalla
+    auto mapearPunto = [&](sf::Vector2f p ){
+        float xNorm = (p.x - lim.minX) / (lim.maxX - lim.minX);
+        float yNorm = (p.y - lim.minY) / (lim.maxY - lim.minY);
+        return sf::Vector2f(
+            paddingL + (xNorm * graphWidth),
+            offsetTop + graphHeight - (yNorm * graphHeight)
+        );
+    };
+    
+    // --- efecto sombreado ---
+    if( sombreado ){
+        sf::VertexArray degradado(sf::TriangleStrip, puntos.size() * 2);
+        for( size_t i = 0; i < puntos.size(); i++ ){
+            sf::Vector2f pPos = mapearPunto(puntos[i]);
+
+            // vertice arriba: posicion del dato, color semi-transparente
+            degradado[2 * i].position = pPos;
+            degradado[2 * i].color = sf::Color(lineaResaltado.r, lineaResaltado.g, lineaResaltado.b, 80);
+
+            // vertice abajo: proyectado al fondo de la grafica, color invisible
+            //  podemos usar lim.minY para que el degradado baje hasta el "suelo" de los datos
+            float valorReferencia = 0.0; //lim.minY
+            sf::Vector2f pBase = mapearPunto({puntos[i].x, lim.minY});
+            degradado[2 * i + 1].position = pBase;
+            degradado[2 * i + 1].color = sf::Color(lineaResaltado.r, lineaResaltado.g, lineaResaltado.b, 0);
+        }
+        window.draw(degradado, states);
+    }
+
+    // --- linea principal ---
+    sf::VertexArray linea(sf::LineStrip, puntos.size());
+    for( size_t i = 0; i < puntos.size(); i++ ){
+        linea[i].position = mapearPunto(puntos[i]);
+        
+          linea[i].color = lineaResaltado;
+        if( desvanece ){
+            // el punto mas reciente (al final) es opaco, 
+            // el mas viejo (al principio) es transparente.
+            // i / puntos.size()  in [0.0 a 1.0]
+            float factor = static_cast<float>(i) / static_cast<float>(puntos.size() - 1);
+            sf::Uint8 alpha = static_cast<sf::Uint8>(255 * factor);
+            
+            linea[i].color = sf::Color(lineaResaltado.r, lineaResaltado.g, lineaResaltado.b, alpha);
+        }
+    }
+    window.draw(linea, states);
+    
+
+    // --- ponerle puntito ---
+    if( !puntos.empty() && desvanece ){
+        float radioPunto = 3.5f; 
+        sf::CircleShape puntoCabeza(radioPunto);
+        
+        // el ultimo guardado es el primero de hasta delante
+        sf::Vector2f ultimaPos = mapearPunto(puntos.back());
+        
+        puntoCabeza.setOrigin(radioPunto, radioPunto); // Centrar el círculo
+        puntoCabeza.setPosition(ultimaPos);
+        puntoCabeza.setFillColor(lineaResaltado); 
+        
+        //  borde blanco p
+        puntoCabeza.setOutlineThickness(1.0f);
+        puntoCabeza.setOutlineColor(sf::Color::White);
+        
+        window.draw(puntoCabeza, states);
+    }
+}
+
+std::string GraficaBase::getEtiquetaY(int i ){
+    if( puntos.empty()) return "0";
+
+    // i va de 0 a (numMarcasY - 1)
+    // fraccion va de 0.0 a 1.0
+    float fraccion = (float)i / (numMarcasY - 1);
+    
+    // Interpolación lineal: valor = min + fraccion * rango
+    float valorReal = lim.minY + (fraccion * (lim.maxY - lim.minY));
+
+    // Formateo inteligente
+    if( std::abs(valorReal) < 0.01f && std::abs(valorReal) > 0.000001f ){
+        // mas precision
+        char buffer[16];
+        snprintf(buffer, sizeof(buffer), "%.4f", valorReal);
+        return std::string(buffer);
+    } else if( std::abs(valorReal) >= 1000.0f ){
+        // Para valores muy grandes (ej. 1.2k)
+        return std::to_string((int)(valorReal / 1000)) + "k";
+    }
+    
+    // usar (int) para limpiar // fixed para decimales
+    return std::to_string((int)valorReal);
+}
+
+std::string GraficaBase::getEtiquetaX(int i ){
+    if( puntos.empty()) return "0";
+
+    float fraccion = (float)i / (numMarcasX - 1);
+    float valorReal = lim.minX + (fraccion * (lim.maxX - lim.minX));
+
+    //  GraficaTiempo,  ver enteros (pasos de tiempo)
+    //  EspacioFase,  valores de la variable X
+    return std::to_string((int)valorReal);
+}
+
+// --- dibujar ---
 void GraficaBase::draw(sf::RenderWindow& window, Panel& parent ){ 
     float alturaTitulo = titulo_texto.getGlobalBounds().height;
     sf::Vector2f pSize = parent.getSize();
@@ -78,7 +199,7 @@ void GraficaBase::draw(sf::RenderWindow& window, Panel& parent ){
         lineaGuia[1] = { {xPos, offsetTop + graphHeight}, colorGuia };
         window.draw(lineaGuia, states);
 
-         // AQUI LLAMAMOS A LOS METODOS DE LA GRAFICA HIJA
+        // AQUI LLAMAMOS A LOS METODOS DE LA GRAFICA HIJA
         sf::Text label(getEtiquetaX(i), font, 10);
         label.setPosition(xPos - 5.f, offsetTop + graphHeight + 5.f);
         label.setFillColor(axisColor);
@@ -116,66 +237,50 @@ void GraficaBase::draw(sf::RenderWindow& window, Panel& parent ){
    se supone que los datos se van agregando en tiempo real
 */
 GraficaTiempo::GraficaTiempo(unsigned int maxPts, sf::Color color, std::string t, const std::string& ruta_fuente)
-    : GraficaBase(maxPts, color, t, ruta_fuente ), sombreado(true) { }
-
-void GraficaTiempo::addValue(float val ){ 
-    datos.push_back(val);
-    if( datos.size() > maxPoints) datos.erase(datos.begin());
-}
-
-std::string GraficaTiempo::getEtiquetaY(int i ){ 
-    if( datos.empty()) return "0";
-    float maxValue = *std::max_element(datos.begin(), datos.end());
-    if( maxValue < 1.0f) maxValue = 1.0f;
-    float fraccion = (float)i / (numMarcasY - 1);
-    return std::to_string((int)(maxValue * fraccion));
-}
-
-std::string GraficaTiempo::getEtiquetaX(int i ){ 
-    return std::to_string(i); 
-}
-
-void GraficaTiempo::dibujarContenido(sf::RenderWindow& window, sf::RenderStates states, float paddingL, float offsetTop, float graphWidth, float graphHeight ){ 
-    if( datos.empty()) return;
-
-    float maxValue = *std::max_element(datos.begin(), datos.end());
-    if( maxValue < 1.0f) maxValue = 1.0f;
-
-    float xStep = graphWidth / static_cast<float>(maxPoints - 1);
-    float ejeYBase = offsetTop + graphHeight;
-
-    // --- efecto de sombreado (vertical gradient fill) ---
-    if( sombreado ){
-        sf::VertexArray degradado(sf::TriangleStrip, datos.size() * 2);
-        for( size_t i = 0; i < datos.size(); i++ ){
-            float x = paddingL + (i * xStep);
-            float y = ejeYBase - (datos[i] / maxValue * graphHeight);
-
-            // vertice arriba (color con transparencia)
-            degradado[2 * i].position = {x, y};
-            degradado[2 * i].color = sf::Color(lineaResaltado.r, lineaResaltado.g, lineaResaltado.b, 80);
-
-            // vertice abajo (en el eje con transparencia total)
-            degradado[2 * i + 1].position = {x, ejeYBase};
-            degradado[2 * i + 1].color = sf::Color(lineaResaltado.r, lineaResaltado.g, lineaResaltado.b, 0);
-        }
-        window.draw(degradado, states);
+    : GraficaBase(maxPts, color, t, ruta_fuente ){ 
+        ponerSobreado(true);
     }
 
-    // --- linea principal (glowing top line) ---
-    sf::VertexArray linea(sf::LineStrip, datos.size());
-    for( size_t i = 0; i < datos.size(); i++ ){ 
-        float x = paddingL + (i * xStep);
-        float y = ejeYBase - (datos[i] / maxValue * graphHeight);
-        linea[i].position = {x, y};
-        linea[i].color = lineaResaltado;
-    }
-    window.draw(linea, states);
+void GraficaTiempo::addValue(float val ){
+    // x es el tiempo (podira ser un contador o segundos)
+    float x = puntos.empty() ? 0 : puntos.back().x + 1; 
+    puntos.push_back({x, val});
+    
+    if( puntos.size() > maxPoints) puntos.erase(puntos.begin());
 }
 
-void GraficaTiempo::ponerSobreado( bool s ){
-    sombreado = s;
+void GraficaTiempo::recalcularExtremos(void){
+    // --- auto escala -- 
+    // calcula los limites super inferior der e izq dinamicamente
+    // lim = { puntos[0].x, puntos[0].x, puntos[0].y, puntos[0].y }; // lo coemntamos para que sea max total
+    lim.minX = puntos[0].x;
+    for( const auto& p : puntos ){
+        if( p.x < lim.minX) lim.minX = p.x;
+        if( p.x > lim.maxX) lim.maxX = p.x;
+        if( p.y < lim.minY) lim.minY = p.y;
+        if( p.y > lim.maxY) lim.maxY = p.y;
+    }
+    // if( puntos.size() < maxPoints ) lim.minX = 0;
+    if( puntos.size() < maxPoints ) lim.maxX = maxPoints;
+
+    // siempre graficar ahsta el 0 (opcional)
+    if( lim.minY > 0 ) lim.minY = 0; 
+    if( lim.maxY < 0 ) lim.maxY = 0;
+    //if( lim.minX > 0 ) lim.minX = 0; 
+    //if( lim.maxX < 0 ) lim.maxX = 0;
+
+    // por si dividir entre 0
+    float epsilon = 0.0001f;
+    if( abs(lim.maxX - lim.minX) < epsilon ){
+        lim.minX -= 1.0f;
+        lim.maxX += 1.0f;
+    }
+    if( std::abs(lim.maxY - lim.minY) < epsilon ){
+        lim.minY -= 1.0f;
+        lim.maxY += 1.0f;
+    }
 }
+
 
 /*
     GRAFICAS DE ESPACIO FASE
@@ -185,6 +290,7 @@ GraficaEspacioFase::GraficaEspacioFase(unsigned int maxPts, sf::Color color, std
     : GraficaBase(maxPts, color, t, ruta_fuente ){ 
     nombreEjeX = "X";
     nombreEjeY = "Y";
+    ponerDesvanecido(true);
 }
 
 void GraficaEspacioFase::addValue(float x, float y ){ 
@@ -193,44 +299,31 @@ void GraficaEspacioFase::addValue(float x, float y ){
         puntos.erase(puntos.begin());
     }
 }
-
-std::string GraficaEspacioFase::getEtiquetaY(int i ){ 
-    if( puntos.empty()) return "0";
-    float maxY = 0.01f;
-    for(auto& p : puntos) if(p.y > maxY) maxY = p.y;
-    
-    float fraccion = (float)i / (numMarcasY - 1);
-    return std::to_string((int)(maxY * fraccion));
-}
-
-std::string GraficaEspacioFase::getEtiquetaX(int i ){ 
-    if( puntos.empty()) return "0";
-    float maxX = 0.01f;
-    for(auto& p : puntos) if(p.x > maxX) maxX = p.x;
-    
-    float fraccion = (float)i / (numMarcasX - 1);
-    return std::to_string((int)(maxX * fraccion));
-}
-
-void GraficaEspacioFase::dibujarContenido(sf::RenderWindow& window, sf::RenderStates states, float paddingL, float offsetTop, float graphWidth, float graphHeight ){ 
-    if( puntos.empty()) return;
-
-    float maxX = 0.01f;
-    float maxY = 0.01f;
-    for( auto& p : puntos ){ 
-        if( p.x > maxX) maxX = p.x;
-        if( p.y > maxY) maxY = p.y;
+void GraficaEspacioFase::recalcularExtremos(void){
+    // --- auto escala -- 
+    // calcula los limites super inferior der e izq dinamicamente
+    // lim = { puntos[0].x, puntos[0].x, puntos[0].y, puntos[0].y }; // lo coemntamos para que sea max total
+    for( const auto& p : puntos ){
+        if( p.x < lim.minX) lim.minX = p.x;
+        if( p.x > lim.maxX) lim.maxX = p.x;
+        if( p.y < lim.minY) lim.minY = p.y;
+        if( p.y > lim.maxY) lim.maxY = p.y;
     }
-    maxX *= 1.2, maxY *= 1.2;
-    
-    sf::VertexArray linea(sf::LineStrip, puntos.size());
 
-    for( size_t i = 0; i < puntos.size(); i++ ){ 
-        float posX = paddingL + (puntos[i].x / maxX * graphWidth);
-        float posY = offsetTop + graphHeight - (puntos[i].y / maxY * graphHeight);
-        
-        linea[i].position = {posX, posY};
-        linea[i].color = lineaResaltado;
+    // siempre graficar ahsta el 0 (opcional)
+    if( lim.minY > 0 ) lim.minY = 0; 
+    if( lim.maxY < 0 ) lim.maxY = 0;
+    //if( lim.minX > 0 ) lim.minX = 0; 
+    //if( lim.maxX < 0 ) lim.maxX = 0;
+
+    // por si dividir entre 0
+    float epsilon = 0.0001f;
+    if( abs(lim.maxX - lim.minX) < epsilon ){
+        lim.minX -= 1.0f;
+        lim.maxX += 1.0f;
     }
-    window.draw(linea, states);
+    if( std::abs(lim.maxY - lim.minY) < epsilon ){
+        lim.minY -= 1.0f;
+        lim.maxY += 1.0f;
+    }
 }

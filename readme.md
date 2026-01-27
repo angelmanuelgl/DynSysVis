@@ -19,4 +19,6 @@ Está diseñada para integrarse fácilmente en simulaciones complejas, permitien
 Para compilar el proyecto manualmente, utiliza el siguiente comando:
 
 ```bash
-g++ main.cpp src/Geometria.cpp src/Graficas.cpp -I include -o InsightRT.exe -lsfml-graphics -lsfml-window -lsfml-system
+g++ main.cpp src/Geometria.cpp src/Graficas.cpp -I include -o hormigas.exe -lsfml-graphics -lsfml-window -lsfml-system
+g++ pendulo.cpp src/Geometria.cpp src/Graficas.cpp -I include -o pendulo.exe -lsfml-graphics -lsfml-window -lsfml-system
+```
