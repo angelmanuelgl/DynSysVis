@@ -4,11 +4,11 @@
     * 
     * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
     * libreria de herramientas graficas para monitoreo de datos 
-    * en vivo y comportamiento de sistemas complejos.
+    * en tiempo real y comportamiento de sistemas complejos.
 */
 /*  GEOMETRIA.hpp
-    generacion de formas procedimentales y 
-    gestion de paneles dinamicos con bordes redondeados
+    generacion de formas procedimentales 
+    rectangulos redondeados
 */
 #ifndef GEOMETRIA_HPP
 #define GEOMETRIA_HPP
@@ -17,7 +17,7 @@
 #include <cmath>
 #include <algorithm>
 
-// Estructura de utilidad
+// --- estructuras euxiliares ---
 struct Vector2f { 
     float x, y;
     Vector2f operator+(const Vector2f& other) const { return {x + other.x, y + other.y}; }
@@ -41,55 +41,25 @@ struct generadorRectangulo {
     sf::Vector2f getPunto(uint32_t i) const;
 };
 
-// Firmas de funciones globales
+// funciones globales
 sf::VertexArray generarRectanguloRelleno(sf::Vector2f size, float radio, uint32_t calidad, sf::Color color);
 
 void generarBorde(sf::VertexArray& vertex_array, sf::Vector2f position, sf::Vector2f size, 
                   float radio, float grosor, uint32_t calidad, sf::Color color);
 
-// --- Elementos de Interfaz ---
+// el dibujo de lo que sera el poanel un rectangulo con esquinaws redondeadas
 
-enum class Ubicacion {
-    ArribaIzq, ArribaCentro, ArribaDer,
-    AbajoIzq, AbajoCentro, AbajoDer,
-    CentroIzq, CentroDer, Centro
-};
-
-enum class RelativoA {
-    Arriba, Abajo, Izq, Der
-};
-
-class Panel {
+class  RectanguloRedondeado{
 private:
-    // el panel en si
-    sf::VertexArray background;
+    sf::VertexArray background;  
     sf::VertexArray contorno;
-    sf::Transform mytransform; 
-    sf::Vector2f pos_actual;
-    // referencias
-    const sf::RenderWindow& window;
-    // poscionar //todo: hacer una clase que contenga todos los paneles // para tener medidas iguales para todos
-    float radio = 20.0f;
-    float espaciado = 15.f;
-    float margenVentana = 20.f;
-    sf::Vector2f size;
-
 public:
-    Panel(const sf::RenderWindow& window_, sf::Color extColor, 
-                int nx = 3, int ny = 4, // para tamano
-                sf::Color bgColor=sf::Color(30,30,30) ); // color de fondo
-
-
-    sf::Vector2f getPosition() const { return pos_actual; }
-    sf::Vector2f getSize() const { return size; }
-
-    void positionAbsoluta(Ubicacion ubi, const sf::RenderWindow& window);
-    void positionRelativa(RelativoA rel, const Panel& other);
-    void setPosition(float x, float y);
-    void configurarMedidas( float r, float esp, float margen){ radio = r; espaciado = esp; margen = margenVentana;  }
+    void generar(sf::Vector2f size, float radio, sf::Color bgColor, sf::Color extColor);
     
-    sf::RenderStates getInternalState() const;
-    void draw(sf::RenderWindow& window);
+
+    void draw( sf::RenderWindow& window, const sf::Transform& transform);
 };
+
+
 
 #endif

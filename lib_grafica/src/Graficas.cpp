@@ -4,7 +4,7 @@
     * 
     * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
     * libreria de herramientas graficas para monitoreo de datos 
-    * en vivo y comportamiento de sistemas complejos.
+    * en tiempo real y comportamiento de sistemas complejos.
  */
 /*  Graficas.cpp
     sistema de clases base para graficar en el plano x y
@@ -13,6 +13,9 @@
             -> retratos de fase 2D
 */
 #include "Graficas.hpp"
+
+
+
 
 /*
     GRAFICAS BASE
@@ -48,6 +51,8 @@ GraficaBase::GraficaBase(unsigned int maxPts, sf::Color color, std::string t )
     lim = {0,0,0,0};
 }
 
+
+
 void GraficaBase::dibujarContenido(sf::RenderWindow& window, sf::RenderStates states, float paddingL, float offsetTop, float graphWidth, float graphHeight ){
     if( puntos.empty()) return;
 
@@ -65,7 +70,7 @@ void GraficaBase::dibujarContenido(sf::RenderWindow& window, sf::RenderStates st
             offsetTop + graphHeight - (yNorm * graphHeight)
         );
     };
-    
+
     // --- efecto sombreado ---
     if( sombreado ){
         sf::VertexArray degradado(sf::TriangleStrip, puntos.size() * 2);
@@ -78,8 +83,10 @@ void GraficaBase::dibujarContenido(sf::RenderWindow& window, sf::RenderStates st
 
             // vertice abajo: proyectado al fondo de la grafica, color invisible
             //  podemos usar lim.minY para que el degradado baje hasta el "suelo" de los datos
-            float valorReferencia = 0.0; //lim.minY
-            sf::Vector2f pBase = mapearPunto({puntos[i].x, lim.minY});
+            float valorReferencia = lim.minY ;// 0.0 ; //lim.minY
+            if( sombreadoAlEje ) valorReferencia = 0.0;
+
+            sf::Vector2f pBase = mapearPunto({puntos[i].x, valorReferencia});
             degradado[2 * i + 1].position = pBase;
             degradado[2 * i + 1].color = sf::Color(lineaResaltado.r, lineaResaltado.g, lineaResaltado.b, 0);
         }
@@ -162,10 +169,10 @@ std::string GraficaBase::getEtiquetaX(int i ){
 }
 
 // --- dibujar ---
-void GraficaBase::draw(sf::RenderWindow& window, Panel& parent ){ 
+void GraficaBase::draw(sf::RenderWindow& window, sf::RenderStates states, sf::Vector2f pSize ){ 
     float alturaTitulo = titulo_texto.getGlobalBounds().height;
-    sf::Vector2f pSize = parent.getSize();
-    sf::RenderStates states = parent.getInternalState();
+    // sf::Vector2f pSize = parent.getSize();
+    // sf::RenderStates states = parent.getInternalState(); // antes se pasaba Panel& parent parametro
     
     float paddingL = mostrarEtiquetasEjes ? 45.f : 30.f;
     float paddingB = mostrarEtiquetasEjes ? 35.f : 25.f;
@@ -244,9 +251,8 @@ void GraficaBase::draw(sf::RenderWindow& window, Panel& parent ){
    se supone que los datos se van agregando en tiempo real
 */
 GraficaTiempo::GraficaTiempo( sf::Color color, std::string t)
-    :GraficaBase(500, color, t)
-{    
-    ponerSobreado(true);
+    :GraficaBase(500, color, t) {    
+    ponerSombreado(true, true);
 }
 
 void GraficaTiempo::addValue(float val ){

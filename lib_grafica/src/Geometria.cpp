@@ -4,7 +4,7 @@
     * 
     * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
     * libreria de herramientas graficas para monitoreo de datos 
-    * en vivo y comportamiento de sistemas complejos.
+    * en tiempo real y comportamiento de sistemas complejos.
  */
 /*  GEOMETRIA.cpp
     generacion de formas procedimentales y 
@@ -75,81 +75,20 @@ void generarBorde(sf::VertexArray& vertex_array, sf::Vector2f position, sf::Vect
     vertex_array[2 * calidad + 0].color = color;
     vertex_array[2 * calidad + 1].color = color;
 }
-
 /*
-    STRUCT PANEL
-    generar paneles dinamicos
+    STRUCT 
+    generar la parte dibujable de un panel
+    el borde y fondo
+
 */
-Panel::Panel(const sf::RenderWindow& window_,  sf::Color extColor,  int nx, int ny , sf::Color bgColor):
-    window(window_) {
-    // --- calcular el tamano ---
-    sf::Vector2u windowSize = window.getSize();
-    
-    // --- espacio TOTAL disponible ---
-    // restando los margenes de la ventana
-    float disponibleX = static_cast<float>(windowSize.x) - (2.0f * margenVentana);
-    float disponibleY = static_cast<float>(windowSize.y) - (2.0f * margenVentana);
 
-    // -- restar espaciado entre paneles ---
-    // si nx es 1, no hay huecos. Si nx es 2, hay 1 hueco .... 
-    float huecosX = (nx > 1) ? (nx - 1) * espaciado : 0.f;
-    float huecosY = (ny > 1) ? (ny - 1) * espaciado : 0.f;
-
-    // 3. Dividir el espacio neto restante entre el número de paneles
-    float x = (disponibleX - huecosX) / nx;
-    float y = (disponibleY - huecosY) / ny;
-    
-    size = {x, y};
-
-    // generar
+void RectanguloRedondeado::generar(sf::Vector2f size, float radio, sf::Color bgColor, sf::Color extColor){
     background = generarRectanguloRelleno(size, radio, 40, bgColor);
-    generarBorde(contorno, {0,0}, size, radio, 2.0f, 40, extColor);
+    generarBorde(contorno, {0.f, 0.f}, size, radio, 2.0f, 40, extColor);
 }
 
-void Panel::setPosition(float x, float y) {
-    pos_actual = {x, y};
-    mytransform = sf::Transform::Identity;
-    mytransform.translate(x, y);
+void RectanguloRedondeado::draw( sf::RenderWindow& window, const sf::Transform& transform) {
+    window.draw(background, transform);
+    window.draw(contorno, transform);
 }
 
-void Panel::positionAbsoluta(Ubicacion ubi, const sf::RenderWindow& window){
-    sf::Vector2u winSize = window.getSize();
-    float x = 0, y = 0;
-    switch(ubi) {
-        case Ubicacion::ArribaIzq:    x = margenVentana; y = margenVentana; break;
-        case Ubicacion::ArribaCentro: x = (winSize.x - size.x) / 2.f; y = margenVentana; break;
-        case Ubicacion::ArribaDer:    x = winSize.x - size.x - margenVentana; y = margenVentana; break;
-        case Ubicacion::AbajoIzq:     x = margenVentana; y = winSize.y - size.y - margenVentana; break;
-        case Ubicacion::AbajoCentro:  x = (winSize.x - size.x) / 2.f; y = winSize.y - size.y - margenVentana; break;
-        case Ubicacion::AbajoDer:     x = winSize.x - size.x - margenVentana; y = winSize.y - size.y - margenVentana; break;
-        case Ubicacion::Centro:       x = (winSize.x - size.x) / 2.f; y = (winSize.y - size.y) / 2.f; break;
-        case Ubicacion::CentroIzq:    x = margenVentana;  y = (winSize.y - size.y) / 2.f; break;
-        case Ubicacion::CentroDer:    x = winSize.x - size.x - margenVentana;  y = (winSize.y - size.y) / 2.f; break;
-    }
-    setPosition(x, y);
-}
-
-void Panel::positionRelativa(RelativoA rel, const Panel& other){
-    sf::Vector2f oPos = other.getPosition();
-    sf::Vector2f oSize = other.getSize();
-    float x = oPos.x;
-    float y = oPos.y;
-    switch (rel) {
-        case RelativoA::Arriba: y = oPos.y - size.y - espaciado; break;
-        case RelativoA::Abajo:  y = oPos.y + oSize.y + espaciado; break;
-        case RelativoA::Izq:    x = oPos.x - size.x - espaciado; break;
-        case RelativoA::Der:    x = oPos.x + oSize.x + espaciado; break;
-    }
-    setPosition(x, y);
-}
-
-sf::RenderStates Panel::getInternalState() const {
-    sf::RenderStates states;
-    states.transform = mytransform;
-    return states;
-}
-
-void Panel::draw(sf::RenderWindow& window) {
-    window.draw(background, mytransform);
-    window.draw(contorno, mytransform);
-}

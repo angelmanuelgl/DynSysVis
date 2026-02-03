@@ -4,20 +4,20 @@
     * 
     * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
     * libreria de herramientas graficas para monitoreo de datos 
-    * en vivo y comportamiento de sistemas complejos.
+    * en en tiempo real y comportamiento de sistemas complejos.
  */
 /*  MAIN.cpp
     ejemplo para usar mi libreria InsightRT
-    APLICACION: sistema dinamicos de hormigas
+    
+    APLICACION: pendulo simple
+                ECUACION DIFERENCIABLE DE SEGUNDO ORDEN 
 */
 #include <SFML/Graphics.hpp>
 #include <cmath>
 #include <vector>
 #include <algorithm>
 
-#include "Geometria.hpp"
-#include "Graficas.hpp"
-#include "Temas.hpp"
+#include "Libreria.hpp"
 
 int main( ){
     // --- cargar colores ---
@@ -32,27 +32,32 @@ int main( ){
     float theta = 1.5f;      // angulo inicial (aprox 85 grados)
     float omega = 0.0f;      // velocidad angular inicial
     const float g = 9.81f;   // gravedad
-    const float L = 200.0f;  // longitud del pendulo (en pixeles para visualización)
-    const float amortiguamiento = 3.995f; // opcional: para que se detenga poco a poco
+    const float L = 200.0f;  // longitud del pendulo (en pixeles para visualizacion)
+    const float amortiguamiento = 0.999f; // opcional: para que se detenga poco a poco
 
-    // --- Interfaz InsightRT ---
-    float espaciado = 15.f;
-    float margenVentana = 20.f;
-
-    // Panel para el angulo Theta(t)
-    Panel panelTheta(window, Tema::yellow, 3, 3);
-    panelTheta.positionAbsoluta(Ubicacion::CentroDer, window);
-    GraficaTiempo graphTheta(Tema::yellow, "Angulo Theta(t)");
-
-    // Panel para velocidad angular omega(t)
-    Panel panelOmega(window, Tema::yellow, 3, 3);
+    // --- paneles --- 
+    Panel panelTheta(window, Tema::c("rojo"), 4,3 );
+    panelTheta.positionAbsoluta(Ubicacion::CentroDer);
+    
+    Panel panelOmega(window, Tema::c("naranja"), 4,3 );
     panelOmega.positionRelativa(RelativoA::Arriba, panelTheta);
-    GraficaTiempo graphOmega(Tema::yellow, "Velocidad Omega(t)");
-
-    // panel para el Espacio de Fase (Theta vs Omega)
-    Panel panelFase(window, Tema::green,3 , 3);
+    
+    Panel panelFase(window, Tema::c("amarillo"), 4,3 );
     panelFase.positionRelativa(RelativoA::Abajo, panelTheta);
-    GraficaEspacioFase graphFase(Tema::green, "Fase (Theta, Omega)");
+    
+    // --- graficas y contenido en general ---
+    auto* ptrTheta = panelTheta.crearContenido<GraficaTiempo>(Tema::c("rojo"), "Angulo Theta(t)");
+    auto* ptrOmega = panelOmega.crearContenido<GraficaTiempo>(Tema::c("naranja"), "Velocidad Omega(t)");
+    auto* ptrFase  = panelFase.crearContenido<GraficaEspacioFase>(Tema::c("amarillo"), "Fase (theta, omega)");
+
+
+    // --- configurar limites -- 
+    // (opcional pero se ve mejor)
+    // ptrTheta -> ponerSombreado( true, false);
+    // graphTheta -> configurarLimites(-1,1, -1, 1);
+    ptrOmega -> configurarLimites( 0,0, -3, 3);
+    ptrFase -> configurarLimites(-0,0, -3, 3);
+
 
     // --- Control del tiempo ---
     sf::Clock clock;
@@ -63,7 +68,7 @@ int main( ){
     while( window.isOpen() ){
         sf::Event event;
         while( window.pollEvent(event) ){
-            if (event.type == sf::Event::Closed) window.close();
+            if( event.type == sf::Event::Closed) window.close();
         }
 
         accumulator += clock.restart();
@@ -73,13 +78,13 @@ int main( ){
             // --- pendulo (Euler-Cromer para mejor estabilidad) ---
             float aceleracion = -(g / (L / 100.0f)) * std::sin(theta); // L/100 para escalar metros
             omega += aceleracion * dt;
-            // omega *= amortiguamiento; // Descomenta para friccion
+            omega *= amortiguamiento; // Descomenta para friccion
             theta += omega * dt;
 
-            // actualizar graficas
-            graphTheta.addValue(theta);
-            graphOmega.addValue(omega);
-            graphFase.addValue(theta, omega);
+            // --- actualizar graficas ---
+            ptrTheta->addValue(theta);
+            ptrOmega->addValue(omega);
+            ptrFase->addValue(theta, omega);
 
             accumulator -= ups;
         }
@@ -87,29 +92,24 @@ int main( ){
         // --- RENDERIZADO ---
         window.clear(sf::Color(10, 10, 10));
 
-        // dibujar el pendulo fisicamente
-        sf::Vector2f origen(window.getSize().x / 4.0f, window.getSize().y / 2.0f);
-        sf::Vector2f extremo(origen.x + L * std::sin(theta), origen.y + L * std::cos(theta));
+        // // dibujar el pendulo fisicamente
+        // sf::Vector2f origen(window.getSize().x / 4.0f, window.getSize().y / 2.0f);
+        // sf::Vector2f extremo(origen.x + L * std::sin(theta), origen.y + L * std::cos(theta));
 
-        sf::Vertex linea[] = { sf::Vertex(origen), sf::Vertex(extremo, sf::Color::White) };
-        window.draw(linea, 2, sf::Lines);
+        // sf::Vertex linea[] = { sf::Vertex(origen), sf::Vertex(extremo, sf::Color::White) };
+        // window.draw(linea, 2, sf::Lines);
 
-        sf::CircleShape masa(15.f);
-        masa.setFillColor(sf::Color::Cyan);
-        masa.setOrigin(15.f, 15.f);
-        masa.setPosition(extremo);
-        window.draw(masa);
+        // sf::CircleShape masa(15.f);
+        // masa.setFillColor(sf::Color::Cyan);
+        // masa.setOrigin(15.f, 15.f);
+        // masa.setPosition(extremo);
+        // window.draw(masa);
 
-        // paneles y graficas
-        panelTheta.draw(window);
-        graphTheta.draw(window, panelTheta);
-
-        panelFase.draw(window);
-        graphFase.draw(window, panelFase);
-
-        
-        panelOmega.draw(window);
-        graphOmega.draw(window, panelOmega);
+        // --- paneles y graficas y marco ---
+        // Cada panel dibuja: su marco , su contenido interno
+        panelTheta.draw();
+        panelOmega.draw();
+        panelFase.draw();
 
 
         window.display();

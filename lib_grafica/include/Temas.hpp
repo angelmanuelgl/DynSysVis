@@ -4,7 +4,7 @@
     * 
     * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
     * libreria de herramientas graficas para monitoreo de datos 
-    * en vivo y comportamiento de sistemas complejos.
+    * en tiempo real y comportamiento de sistemas complejos.
 */
 /*  Temas.hpp
     sirvira para gestionar colores generales, 
@@ -21,25 +21,32 @@
 #include <fstream>
 #include <iostream>
 
+// nota no usa enum class porque aqui guardamos info
 // Temas.hpp
 namespace Tema{
-    // nota no usa enum class porque aqui guardamos info
-    inline sf::Color Fondo;
-    inline sf::Color Panel;
     
-    inline sf::Color Obreras, Guerreras, Recolectoras,  Color1,  Color2, rosa;
-    
-    inline sf::Color dark_blue, green, primary_blue, red, yellow, dark_grey;
-    inline sf::Color light_violet, light_green, light_blue, light_red, light_yellow, light_grey;
-    inline sf::Color white, black;
+    //  mapa  se guardan todos los colores del txt
+    inline std::map<std::string, sf::Color> colores;
 
+    // obtener cualquier color por su nombre en el txt
+    inline sf::Color obtener(const std::string& nombre) {
+        if( colores.find(nombre) != colores.end()) {
+            return colores[nombre];
+        }
+        return sf::Color::Magenta; // color de error si no existe
+    }
+    
+    // para acceder mas facil
+    inline sf::Color c(const std::string& nombre) { return obtener(nombre); }
+
+    // --- lectura --- 
     bool siEs( int valor ){
         return valor >= 0 && valor <= 255;
     }
 
     void cargar(const std::string& ruta) {
         std::ifstream file(ruta);
-        std::map<std::string, sf::Color> m;
+
         std::string tag;
         int r, g, b, a;
         std::string posible;
@@ -48,7 +55,7 @@ namespace Tema{
             // TODO: hacer psoible agregar coemntarios
             if( tag.size() >= 1 && tag[0] == '/') {
                 std::string basura;
-                std::getline(file, basura); // Consume el resto de la línea y la tira
+                std::getline(file, basura); // Consume el resto de la linea y la tira
                 continue;
             }
             
@@ -57,8 +64,8 @@ namespace Tema{
 
             // --- un color ya usado ---
             if(  std::isalpha( static_cast<unsigned char>(posible[0]) )  ){
-                if( m.count(posible) ){
-                    m[tag] = m[posible];
+                if( colores.count(posible) ){
+                    colores[tag] = colores[posible];
                 } 
                 // no has definido el color ya sadp
                 else {
@@ -72,7 +79,7 @@ namespace Tema{
                     r = std::stoi(posible);
                     file >> g >> b >> a;
                     if(  siEs(r) && siEs(g) && siEs(b) && siEs(a)  ){
-                         m[tag] = sf::Color(r,g,b,a);
+                        colores[tag] = sf::Color(r,g,b,a);
                     }else{
                         std::cerr << "ERROR: Valores fuera de rango (0-255) en " << tag << "\n";
                     }
@@ -86,31 +93,6 @@ namespace Tema{
             }
             
         } 
-
-        // generales
-        dark_blue    = m["dark_blue"];
-        green        = m["green"];
-        primary_blue = m["primary_blue"];
-        red          = m["red"];
-        yellow       = m["yellow"];
-        dark_grey    = m["dark_grey"];
-        light_violet = m["light_violet"];
-        light_green  = m["light_green"];
-        light_blue   = m["light_blue"];
-        light_red    = m["light_red"];
-        light_yellow = m["light_yellow"];
-        light_grey   = m["light_grey"];
-        white        = m["white"];
-        black        = m["black"];
-        // especificos
-        rosa = m["rosa"];
-        Fondo = m["fondo"];
-        Obreras = m["obreras"];
-        Guerreras = m["guerreras"];
-        Recolectoras = m["recolectoras"];
-        Panel = m["panel"];
-        Color1 = m["color1"];
-        Color2 = m["color2"];
     }
 }
 

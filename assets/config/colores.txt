@@ -8,21 +8,27 @@ primary_blue 0 110 182 255
 red 186 12 47 255
 yellow 253 207 65 255
 
-light_violet 211 213 237 255
-light_green 226 250 225 255
-light_blue 212 233 249 255
-light_red 251 220 231 255
-light_yellow 255 240 190 255
+// --- variado ---
+rojo        255 100 130 255
+naranja     255 160 60  255
+amarillo    255 235 100 255
+verde       100 255 170 255
+celeste     130 245 255 255
+azul        110 170 255 255
+violeta     160 110 255 255
+rosa        255 80  140 255
 
-alt_light_violet 188 189 226 255
-alt_light_green 205 228 196 255
-alt_light_blue 175 219 246 255
-alt_light_red 248 201 219 255
-alt_light_yellow 255 237 153 255
-alt_light_grey 201 202 204 255
+// --- acento (Claros) ---
+rojo_l       214 122 131 255
+naranja_l    235 165 145 255
+amarillo_l   255 225 160 255
+verde_l      185 212 160 255
+cian_l       155 210 225 255
+azul_l       150 180 210 255
+morado_l     205 165 195 255
+rosa_l        255 80  140 255
 
 white 255 255 255 255
-light_grey 236 237 238 255
 grey_40 167 169 171 255
 grey_56 135 137 140 255
 grey_72 105 106 108 255
@@ -31,15 +37,15 @@ black 0 0 0 255
 
 
 // mis colores
-rosa 255 150 150 255
+rosa2 255 150 150 255
 
 // colores usadods
 fondo 15 15 15 255
 panel 30 30 30 255
 
 //  tambine se puede usar uso colores definidos antes
-obreras alt_light_blue 
-guerreras rosa
-recolectoras 120 80 0 255
-color2 green
-color1 primary_blue
+obreras naranja 
+guerreras rojo 
+recolectoras amarillo
+color2 azul
+color1 cian

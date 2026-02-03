@@ -4,7 +4,7 @@
     * 
     * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
     * libreria de herramientas graficas para monitoreo de datos 
-    * en vivo y comportamiento de sistemas complejos.
+    * en en tiempo real y comportamiento de sistemas complejos.
  */
 /*  MAIN.cpp
     ejemplo para usar mi libreria InsightRT
@@ -15,9 +15,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "Geometria.hpp"
-#include "Graficas.hpp"
-#include "Temas.hpp"
+#include "Libreria.hpp"
 
 
 
@@ -48,31 +46,33 @@ int main( ){
     const float dR = 0.05f;      // muerte Recolectoras
 
 
-    // --- Guerreras G(t) ----
-    Panel panelG(window, Tema::Guerreras, 4,4);
-    panelG.positionAbsoluta(Ubicacion::ArribaDer, window);
-    GraficaTiempo graphG(Tema::Guerreras, "Poblacion de Guerreras G(t)");
+    // --- paneles----
+    Panel panelG(window, Tema::c("guerreras"), 4,3 );
+    panelG.positionAbsoluta(Ubicacion::ArribaDer);
 
-    // --- Recolectoras R(t) ---
-    Panel panelR(window,  Tema::Recolectoras,  4,4);
+    Panel panelR(window,  Tema::c("recolectoras"),  4,3 );
     panelR.positionRelativa(RelativoA::Abajo, panelG);
-    GraficaTiempo graphR(Tema::Recolectoras, "Poblacion de Recolectoras R(t)");
 
-    // --- Obreras O(t) ---
-    Panel panelO(window,  Tema::Obreras, 4,4);
+    Panel panelO(window,  Tema::c("obreras"), 4,3 );
     panelO.positionRelativa(RelativoA::Abajo, panelR);
-    GraficaTiempo graphO(Tema::Obreras, "Poblacion de Obreras O(t)");
-    //graphO.ponerSobreado(false);
 
-    // --- boceto de fase ---
-    Panel nuevoPanel(window, Tema::Color1);
-    nuevoPanel.positionAbsoluta(Ubicacion::ArribaIzq, window);
-    GraficaEspacioFase nuevaGrafica(Tema::Color1, "(Obreras, Guerreras)");
+    Panel panelf1(window, Tema::c("color1"), 3, 2);
+    panelf1.positionAbsoluta(Ubicacion::ArribaIzq);
 
-    // --- boceto de fase ---
-    Panel nuevoPanel2(window,  Tema::Color2);
-    nuevoPanel2.positionRelativa(RelativoA::Abajo  , nuevoPanel);
-    GraficaEspacioFase nuevaGrafica2(Tema::Color2, "(Obreras, Recolectoras)");
+    Panel panelf2(window,  Tema::c("color2"), 3, 2);
+    panelf2.positionRelativa(RelativoA::Abajo  , panelf1);
+
+
+    // --- graficas respecto a tiempo y respecot a fase ---
+    auto* graphG = panelG.crearContenido<GraficaTiempo>(Tema::c("guerreras"), "Poblacion de Guerreras G(t)");
+ 
+    auto* graphR = panelR.crearContenido<GraficaTiempo>(Tema::c("recolectoras"), "Poblacion de Recolectoras R(t)");
+   
+    auto* graphO = panelO.crearContenido<GraficaTiempo>(Tema::c("obreras"), "Poblacion de Obreras O(t)");
+   
+    auto* fase1 = panelf1.crearContenido<GraficaEspacioFase>(Tema::c("color1"), "(Obreras, Guerreras)");
+  
+    auto* fase2 = panelf2.crearContenido<GraficaEspacioFase>(Tema::c("color2"), "(Obreras, Recolectoras)");
 
 
     // --- IMPORTANTE: control del tiempo --
@@ -107,11 +107,11 @@ int main( ){
             R += dR_dt * dt_val;
 
             // agregar datos a graficas
-            graphG.addValue(G);
-            graphR.addValue(R);
-            graphO.addValue(O);
-            nuevaGrafica.addValue(O,G);
-            nuevaGrafica2.addValue(O,R);
+            graphG -> addValue(G);
+            graphR -> addValue(R);
+            graphO -> addValue(O);
+            fase1 -> addValue(O,G);
+            fase2 -> addValue(O,R);
 
             accumulator -= ups;
         }
@@ -120,20 +120,11 @@ int main( ){
         window.clear(sf::Color(15, 15, 15)); // Fondo oscuro tipo Sci-Fi
 
         // Dibujar paneles y sus graficas internas
-        panelG.draw(window);
-        graphG.draw(window, panelG);
-
-        panelR.draw(window);
-        graphR.draw(window, panelR);
-
-        panelO.draw(window);
-        graphO.draw(window, panelO);
-
-        nuevoPanel.draw(window);
-        nuevaGrafica.draw(window, nuevoPanel);
-
-        nuevoPanel2.draw(window);
-        nuevaGrafica2.draw(window, nuevoPanel2);
+        panelG.draw();
+        panelR.draw();
+        panelO.draw();
+        panelf2.draw();
+        panelf1.draw();
 
         window.display();
     }

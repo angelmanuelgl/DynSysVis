@@ -4,7 +4,7 @@
     * 
     * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
     * libreria de herramientas graficas para monitoreo de datos 
-    * en vivo y comportamiento de sistemas complejos.
+    * en tiempo real y comportamiento de sistemas complejos.
 */
 /*  GEOMETRIA.hpp
     sistema de clases base para graficar
@@ -16,7 +16,8 @@
 #define GRAFICAS_HPP
 
 
-#include "Geometria.hpp" // para que reconozca la clase Panel
+// #include "Panel.hpp" // para que reconozca la clase panel 
+#include "Objeto.hpp" // para que conozca el Objeto generico
 
 #include <SFML/Graphics.hpp>
 #include <vector>
@@ -27,7 +28,7 @@ struct Limites {
     float minX, maxX, minY, maxY;
 };
 
-class GraficaBase {
+class GraficaBase : public Objeto {
 protected:
     unsigned int maxPoints;
     sf::Color lineaResaltado;
@@ -47,6 +48,7 @@ protected:
     bool mostrarEtiquetasEjes; 
     bool sombreado;
     bool desvanece;
+    bool sombreadoAlEje;
 
     std::vector<sf::Vector2f> puntos; //  pares (x, y)
     Limites lim;
@@ -69,13 +71,15 @@ public:
     void configurarEjes(std::string nx, std::string ux, std::string ny, std::string uy) { nombreEjeX = nx; unidadEjeX = ux; nombreEjeY = ny; unidadEjeY = uy; }
     void configurarMarcas(int mx, int my) { numMarcasX = mx; numMarcasY = my; }
     void configurarMaxPoints(int mp) { maxPoints = mp; }
-    //
-    void ponerSobreado( bool s ){ sombreado = s;}
+    void configurarLimites( float mx, float MX, float my, float MY ){  lim = {mx,MX,my,MY};  }
+
+    void ponerSombreado( bool s, bool eje = true ){ sombreado = s; sombreadoAlEje = eje;}
     void ponerDesvanecido( bool s ){ desvanece = s;}
     
     // dibujar
+    sf::Vector2f mapearPunto(sf::Vector2f p, float paddingL, float offsetTop, float graphWidth, float graphHeight );
     void dibujarContenido(sf::RenderWindow& window, sf::RenderStates states, float paddingL, float offsetTop, float graphWidth, float graphHeight);
-    void draw(sf::RenderWindow& window, Panel& parent);
+    void draw(sf::RenderWindow& window, sf::RenderStates states, sf::Vector2f pSize);
 };
 
 class GraficaTiempo : public GraficaBase {

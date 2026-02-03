@@ -1,7 +1,8 @@
+#include <Libreria.hpp>
+
+
 #include <SFML/Graphics.hpp>
-#include "Geometria.hpp"
-#include "Graficas.hpp"
-#include "Temas.hpp"
+
 
 #include <iostream>
 #include <vector>
@@ -38,18 +39,20 @@ int main( ){
     // ---  Interfaz ---
     
 
-    // --- Machos ----
-    Panel panel_m(window, Tema::dark_blue);
-    panel_m.positionAbsoluta(Ubicacion::ArribaDer, window,);
-    GraficaTiempo grafica_m(Tema::dark_blue, "Males / Machos M(t)");
+    // --- paneles ----
+    Panel panel_m(window, Tema::c("azul_l"));
+    panel_m.positionAbsoluta(Ubicacion::ArribaDer);
 
-    // --- Hembras ---
-    Panel panel_f(window,  Tema::rosa); 
+    Panel panel_f(window,  Tema::c("rosa_l")); 
     panel_f.positionRelativa(RelativoA::Abajo, panel_m);
-    GraficaTiempo grafica_f(Tema::rosa, "Females / Hembras F(t)");
 
-    grafica_f.configurarMaxPoints(10);
-    grafica_m.configurarMaxPoints(10);
+    // --- graficas ---
+
+    auto* grafica_m = panel_m.crearContenido<GraficaTiempo>(Tema::c("azul_l"), "Males / Machos M(t)");
+    auto* grafica_f = panel_f.crearContenido<GraficaTiempo>(Tema::c("rosa_l"), "Females / Hembras F(t)");
+
+    grafica_f -> configurarMaxPoints(10);
+    grafica_m -> configurarMaxPoints(10);
 
 
     /// --- parametros --- 
@@ -83,8 +86,8 @@ int main( ){
     }
     
     
-    grafica_m.addValue(cnt_males);
-    grafica_f.addValue(cnt_females);
+    grafica_m->addValue(cnt_males);
+    grafica_f->addValue(cnt_females);
     
     // --- IMPORTANTE: control del tiempo --
     sf::Clock clock;
@@ -116,8 +119,8 @@ int main( ){
 
             // --- agregar datos  ---
             // solo los de esta generacion deben ser agregados
-            grafica_m.addValue(females.size());
-            grafica_f.addValue(males.size());
+            grafica_m->addValue(females.size());
+            grafica_f->addValue(males.size());
 
             std::cout <<  "generacion " <<  g << " (m,f) = " << males.size() << ' ' << females.size() << '\n';
             
@@ -131,8 +134,8 @@ int main( ){
                 std::cout << "extincion\n";
                 seExtinguio = true;
                 
-                grafica_m.addValue(0);
-                grafica_f.addValue(0);
+                grafica_m -> addValue(0);
+                grafica_f -> addValue(0);
 
                 break;
             } 
@@ -173,11 +176,8 @@ int main( ){
         // --- --- ---- graficar --- --- ----
         window.clear(sf::Color(15, 15, 15));
 
-        panel_m.draw(window);
-        grafica_m.draw(window, panel_m);
-
-        panel_f.draw(window);
-        grafica_f.draw(window, panel_f);
+        panel_m.draw();
+        panel_f.draw();
 
         window.display();
     }
