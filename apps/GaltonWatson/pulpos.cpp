@@ -30,7 +30,7 @@ int main() {
     // std::cout << "Gen\tMachos\tHembras\tParejas\n";
     // std::cout << "---------------------------------\n";
     long double media = 0;
-    int iter = 1;
+    int iter = 50;
     int xd = iter;
     while( xd-- ){ 
     poblacion current = {ini_males, ini_females};        

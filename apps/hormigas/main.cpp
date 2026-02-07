@@ -62,17 +62,17 @@ int main( ){
     Panel panelO(window,  Tema::c("obreras"), "Poblacion de Obreras O(t)", 4,3 );
     panelO.positionRelativa(RelativoA::Abajo, panelR);
 
-    Panel panelfOG(window, Tema::c("color1"), "Espacio Fase (O, G)", 5, 4);
+    Panel panelfOG(window, Tema::c("color1"), "Espacio Fase (O, G)", 6, 4);
     panelfOG.positionAbsoluta(Ubicacion::ArribaIzq);
 
-    Panel panelfOR(window,  Tema::c("color2"), "Espacio Fase (O, R)", 5, 4);
+    Panel panelfOR(window,  Tema::c("color2"), "Espacio Fase (O, R)", 6, 4);
     panelfOR.positionRelativa(RelativoA::Abajo  , panelfOG);
 
-    Panel panelfRG(window,  Tema::c("color3"), "Espacio Fase (R, G)", 5, 4);
-    panelfRG.positionRelativa(RelativoA::Abajo  , panelfOR);
+    Panel panelfRG(window,  Tema::c("color3"), "Espacio Fase (R, G)", 6, 4);
+    panelfRG.positionRelativa(RelativoA::Der  , panelfOR);
 
-    Panel panelCirc(window,  Tema::c("rojo"), "Poblacion de Hormigas", 5, 4);
-    panelCirc.positionRelativa(RelativoA::Abajo, panelfRG);
+    Panel panelCirc(window,  Tema::c("rojo"), "Poblacion de Hormigas", 3, 2);
+    panelCirc.positionRelativa(RelativoA::Abajo, panelfOR);
 
    
     

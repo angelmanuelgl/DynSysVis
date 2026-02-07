@@ -34,33 +34,39 @@ int main( ){
 
     // --- configurar ventana ---
     sf::RenderWindow window;
-    Sistema::inicializarVentana(window, "Simulación de Hormigas - Tesis");
+    Sistema::inicializarVentana(window, "Simulacion de Modelo Dalton Watson - Tesis");
 
     // ---  Interfaz ---
     
 
     // --- paneles ----
-    Panel panel_m(window, Tema::c("azul_l"));
-    panel_m.positionAbsoluta(Ubicacion::ArribaDer);
+    Panel panel_m(window, Tema::c("azul"),  "Males / Machos M(t)",3,4);
+    panel_m.positionAbsoluta(Ubicacion::ArribaIzq);
 
-    Panel panel_f(window,  Tema::c("rosa_l")); 
+    Panel panel_f(window,  Tema::c("rosa"),  "Females / Hembras F(t)",3,4); 
     panel_f.positionRelativa(RelativoA::Abajo, panel_m);
 
+    Panel panelCircular(window,  Tema::c("amarillo"),  "Poblacion", 3, 2); 
+    panelCircular.positionAbsoluta(Ubicacion::AbajoIzq);
     // --- graficas ---
 
-    auto* grafica_m = panel_m.crearContenido<GraficaTiempo>(Tema::c("azul_l"), "Males / Machos M(t)");
-    auto* grafica_f = panel_f.crearContenido<GraficaTiempo>(Tema::c("rosa_l"), "Females / Hembras F(t)");
+    auto* grafica_m = panel_m.crearContenido<GraficaTiempo>(Tema::c("azul"));
+    auto* grafica_f = panel_f.crearContenido<GraficaTiempo>(Tema::c("rosa"));
+
+    std::vector<sf::Color> colores = { Tema::c("azul"), Tema::c("rosa"), Tema::c("recolectoras") };
+    auto circ = panelCircular.crearContenido<GraficoCircular>(  );
+    circ->personalizarColores( colores );
 
     grafica_f -> configurarMaxPoints(10);
     grafica_m -> configurarMaxPoints(10);
 
 
     /// --- parametros --- 
-    int max_generations = 1000; // Cuidado: un numero alto genera archivos gigantes
-    double lambda = 2.1;
+    int max_generations = 100; // Cuidado: un numero alto genera archivos gigantes
+    double lambda = 2.2;
     int next_id = 0;
     double probabilidadmale = 0.5f;
-    int init_size = 20; 
+    int init_size = 40; 
 
     std::vector<Pulpo> todosLosIndividuos;
     std::random_device rd;
@@ -121,6 +127,8 @@ int main( ){
             // solo los de esta generacion deben ser agregados
             grafica_m->addValue(females.size());
             grafica_f->addValue(males.size());
+            
+            circ -> addValues( {females.size(), males.size()} );
 
             std::cout <<  "generacion " <<  g << " (m,f) = " << males.size() << ' ' << females.size() << '\n';
             
@@ -136,6 +144,8 @@ int main( ){
                 
                 grafica_m -> addValue(0);
                 grafica_f -> addValue(0);
+                grafica_f -> addValue(0);
+
 
                 break;
             } 
@@ -146,6 +156,12 @@ int main( ){
             std::poisson_distribution<int> poisson(lambda); // hijos
             std::bernoulli_distribution bernoulli( probabilidadmale ); // macho o empra
             
+            
+            // todo
+            // elegir unforee la primera herba // esta eloige unif macho U(n)
+            // elegir unirforme la segunda 
+            // 
+            // todo fijar hebras // unforme sobre mahocs // U(n) U(n-1) ... U(n-2) ... 
 
             std::uniform_int_distribution queMale(0,  (int)males.size()-1 ); // macho o empra
             std::uniform_int_distribution queFemale(0,  (int)females.size()-1 ); // macho o empra
@@ -178,6 +194,7 @@ int main( ){
 
         panel_m.draw();
         panel_f.draw();
+        panelCircular.draw();
 
         window.display();
     }

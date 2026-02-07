@@ -36,19 +36,19 @@ int main( ){
     const float amortiguamiento = 0.999f; // opcional: para que se detenga poco a poco
 
     // --- paneles --- 
-    Panel panelTheta(window, Tema::c("rojo"), "Angulo Theta(t)", 3,3 );
-    panelTheta.positionAbsoluta(Ubicacion::CentroDer);
+    Panel panelTheta(window, Tema::c("rojo"), "Angulo Theta(t)", 2,4 );
+    panelTheta.positionAbsoluta(Ubicacion::ArribaDer);
     
-    Panel panelOmega(window, Tema::c("naranja"), "Velocidad Omega(t)", 3,3 );
-    panelOmega.positionRelativa(RelativoA::Arriba, panelTheta);
+    Panel panelOmega(window, Tema::c("naranja"), "Velocidad Omega(t)", 2,4 );
+    panelOmega.positionRelativa(RelativoA::Abajo, panelTheta);
     
-    Panel panelFase(window, Tema::c("amarillo"), "Fase (omega , theta)", 3,2 );
-    panelFase.positionAbsoluta(Ubicacion::CentroIzq);
+    Panel panelFase(window, Tema::c("violeta"), "Fase (omega , theta)", 2,2 );
+    panelFase.positionAbsoluta(Ubicacion::ArribaIzq);
     
     // --- graficas y contenido en general ---
     auto* ptrTheta = panelTheta.crearContenido<GraficaTiempo>(Tema::c("rojo"));
     auto* ptrOmega = panelOmega.crearContenido<GraficaTiempo>(Tema::c("naranja"));
-    auto* ptrFase  = panelFase.crearContenido<GraficaEspacioFase>(Tema::c("amarillo"));
+    auto* ptrFase  = panelFase.crearContenido<GraficaEspacioFase>(Tema::c("violeta"));
 
 
     // --- configurar limites -- 
@@ -90,7 +90,7 @@ int main( ){
         }
 
         // --- RENDERIZADO ---
-        window.clear(sf::Color(10, 10, 10));
+        window.clear(sf::Color(40, 40, 40));
 
         // // dibujar el pendulo fisicamente
         // sf::Vector2f origen(window.getSize().x / 4.0f, window.getSize().y / 2.0f);

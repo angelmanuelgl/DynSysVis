@@ -63,7 +63,7 @@ private:
 public:
     Panel(sf::RenderWindow& window_, sf::Color extColor, 
                 const std::string& tituloPanel ="", 
-                int nx = 3, int ny = 4, // para tamano
+                double nx = 3, double ny = 4, // para tamano
                 sf::Color bgColor=sf::Color(30,30,30) ); // color de fondo
 
 

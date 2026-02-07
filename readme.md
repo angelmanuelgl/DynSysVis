@@ -4,10 +4,18 @@
 es una herramienta (en desarrollo) para la visualización de datos en tiempo real y análisis de sistemas dinámicos desarrollada en C++ utilizando la biblioteca SFML. 
 
 Está diseñada para integrarse fácilmente en simulaciones complejas, permitiendo monitorear mediante gráficas temporales y retratos de fase.
+**Ajustando tamaños** y **posiciones** muy facilmente usando un **sistema de panales** implementados por mi mismo
 
-![Image](https://github.com/user-attachments/assets/5e4b6a0f-d171-424f-b763-c92d39fa1807)
+Sistema de ecuaciones Diferenciales (Modelo De Colonia de Hormigas)
 
 ![Image](https://github.com/user-attachments/assets/6257ad01-88e9-4828-8d25-a0eb1c262ee9)
+
+![Image](https://github.com/user-attachments/assets/eccc5708-41f1-4552-890b-d635975f7a75)
+
+Ecuaciones Diferenciales De Segundo Orde (Pendulo Simple con resistencia al aire)
+
+![Image](https://github.com/user-attachments/assets/f2ebe176-b8e2-4021-9a7c-a3fe4edd0fc4)
+
 
 ## Caracteristicas
 * **Visualización en Tiempo Real**: Gráficas de evolución temporal con sombreado de degradado (gradient fill).
@@ -67,4 +75,7 @@ mingw32-make run APP=apps/GaltonWatson/simulacionconArbol.cpp
 ```
 
 
+## algunas visualizaciones externas
 
+Para representar grafos rapdiamente usar
+https://edotor.net/

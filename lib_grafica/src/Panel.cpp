@@ -20,7 +20,7 @@
     generar paneles dinamicos
 */
 Panel::Panel(sf::RenderWindow& window_,  sf::Color extColor,  
-            const std::string& tituloPanel, int nx, int ny , sf::Color bgColor):
+            const std::string& tituloPanel, double nx, double ny , sf::Color bgColor):
     window(window_) {   
     // --- calcular el tamano ---
     sf::Vector2u windowSize = window.getSize();
