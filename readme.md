@@ -6,22 +6,58 @@ es una herramienta (en desarrollo) para la visualización de datos en tiempo rea
 Está diseñada para integrarse fácilmente en simulaciones complejas, permitiendo monitorear mediante gráficas temporales y retratos de fase.
 **Ajustando tamaños** y **posiciones** muy facilmente usando un **sistema de panales** implementados por mi mismo
 
-Sistema de ecuaciones Diferenciales (Modelo De Colonia de Hormigas)
-
-![Image](https://github.com/user-attachments/assets/6257ad01-88e9-4828-8d25-a0eb1c262ee9)
-
-![Image](https://github.com/user-attachments/assets/eccc5708-41f1-4552-890b-d635975f7a75)
-
-Ecuaciones Diferenciales De Segundo Orde (Pendulo Simple con resistencia al aire)
-
-![Image](https://github.com/user-attachments/assets/f2ebe176-b8e2-4021-9a7c-a3fe4edd0fc4)
-
 
 ## Caracteristicas
 * **Visualización en Tiempo Real**: Gráficas de evolución temporal con sombreado de degradado (gradient fill).
 * **Análisis de Espacio Fase**: Gráficas de trayectoria (X vs Y) para estudio de sistemas dinámicos.
 * **Interfaz Adaptativa**: Paneles con bordes redondeados y títulos dinámicos que ajustan el área de dibujo automáticamente.
 * **Arquitectura Extensible**: Basada en herencia para facilitar la creación de nuevos tipos de visualizaciones.
+
+
+## Ejemplos de Uso: 
+
+
+**Sistema de ecuaciones Diferenciales (Modelo De Colonia de Hormigas)**
+
+![Image](https://github.com/user-attachments/assets/6257ad01-88e9-4828-8d25-a0eb1c262ee9)
+
+![Image](https://github.com/user-attachments/assets/eccc5708-41f1-4552-890b-d635975f7a75)
+
+**Ecuaciones Diferenciales De Segundo Orde (Pendulo Simple con resistencia al aire)**
+
+![Image](https://github.com/user-attachments/assets/f2ebe176-b8e2-4021-9a7c-a3fe4edd0fc4)
+
+
+
+
+
+
+## MAS Ejemplos de Uso: 
+
+
+**ECUACIONES DIFERENCIALES ORDINARIAS (EDOS)** 
+* Dinámica de Poblaciones: Visualización en tiempo real de modelos de crecimiento (Malthus, Logístico).
+* Cinética Química: Monitoreo de la concentración de reactivos y productos en una reacción.
+* Modelos Epidemiológicos: Seguimiento de curvas SIR (Susceptibles, Infectados, Recuperados) durante una simulación.
+
+**SISTEMAS DE EDOS (SISTEMAS ACOPLADOS)**  | Gracias al sistema de Paneles Adaptativos, puedes monitorear múltiples variables interdependientes simultáneamente.
+* Ecología Competitiva: Modelos de Depredador-Presa (Lotka-Volterra)
+* Circuitos Eléctricos: Análisis de redes complejas (Leyes de Kirchhoff) donde varias corrientes y voltajes varían a la vez.
+* Sistemas de Control: Visualización de la respuesta de un controlador ante perturbaciones externas.
+
+**ECUACIONES DIFERENCIALES DE SEGUNDO ORDEN** |  Permite generar Retratos de Fase (Posición vs. Velocidad).
+* Mecánica Clásica: Simulación de osciladores armónicos, péndulos simples y dobles (con o sin resistencia del aire).
+* Vibraciones Mecánicas: Análisis de amortiguamiento en estructuras o sistemas de suspensión.
+* Circuitos RLC: Comportamiento de la carga y corriente en circuitos con inductores y capacitores.
+
+**PROCESOS ESTOCÁSTICOS Y PROBABILÍSTICOS** 
+
+Biología Matemática: Procesos de ramificación como el de Dalton-Watson
+Cadenas de Markov: Visualización de la evolución de estados en sistemas probabilísticos.
+Finanzas Cuantitativas: Modelado de caminatas aleatorias o movimiento browniano para simular fluctuaciones de mercado.
+
+
+
 
 ## Requisitos
 * Compilador de C++ (GCC/MinGW recomendado).
@@ -79,3 +115,7 @@ mingw32-make run APP=apps/GaltonWatson/simulacionconArbol.cpp
 
 Para representar grafos rapdiamente usar
 https://edotor.net/
+
+```
+python .\apps\GaltonWatson\Plots\plot_results.py
+```
