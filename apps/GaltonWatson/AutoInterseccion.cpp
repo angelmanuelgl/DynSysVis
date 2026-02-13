@@ -19,12 +19,12 @@
 
 int main() {
     // Simulaciones por  experimento
-    int iteraciones_por_punto = 100;
+    int iteraciones_por_punto = 50;
     int max_gen_limite = 50;
     
     // rango de variables para el plano X-Y
     std::vector<int> poblaciones_iniciales = {10, 20, 30, 40, 50, 60};
-    std::vector<double> lambdas = {1.5, 2.0, 2.5, 3.0, 3.5, 4.0};
+    std::vector<double> lambdas = {1.5, 2.0, 2.5, 3.0, 3.5,};
 
     std::ofstream data_file("apps/GaltonWatson/datos/experimento_incesto2.txt");
     data_file << "Poblacion_Inicial Lambda Gen_Media_Incesto\n";

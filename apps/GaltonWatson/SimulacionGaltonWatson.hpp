@@ -3,10 +3,12 @@
 #include <random>
 #include <bitset>
 #include <numeric>
+#include <fstream>
 
-
+typedef int64_t ll;
 
 #define MAXFAM 200
+
 enum Sex { MALE, FEMALE };
 
 struct Pulpo {
@@ -49,7 +51,7 @@ struct Pulpo {
     formato Graphviz (.dot)
     https://edotor.net/
 */
-void guardarGraphviz( std::vector<Pulpo> todosLosIndividuos, int g  ){
+void guardarGraphviz( std::vector<Pulpo>& todosLosIndividuos, int g  ){
     
     // marcar ancestros de individuos con incesto
     // atras hacia adelante para asegurar que la marca se propague
@@ -167,6 +169,10 @@ int ejecutarSimulacion(int size_inicial, double lambda, double probabilidadmale,
         // --- --- --- ---  --- -- --- --- --- --- --- ---  //
 
         int cantidadParejas = std::min( id_males.size(), id_females.size()) ; // TODO: min, max, f, m, otros ejemplos
+
+        cantidadParejas = id_females.size() * std::min( 1, (int) id_males.size());
+        // 10 1
+        // 
         if( cantidadParejas == 0){
             std::cout << "extincion\n";
             seExtinguio = true;
@@ -200,7 +206,7 @@ int ejecutarSimulacion(int size_inicial, double lambda, double probabilidadmale,
             parejas.push_back({ id_male_elegido, id_famale_elegido }); 
 
             //  --- eliminar de la lista de disponibles  ---
-            disponibles_males.erase( disponibles_males.begin() + indice_m );
+            // disponibles_males.erase( disponibles_males.begin() + indice_m );
             disponibles_females.erase( disponibles_females.begin() + indice_f );
         }
 
@@ -262,3 +268,61 @@ int ejecutarSimulacion(int size_inicial, double lambda, double probabilidadmale,
     return g;
 }
 
+
+// simulación  RÁPIDA usando la suma de Poisson
+// Ideal para calcular probabilidades de extinción con miles de iteraciones
+int DaltonWatsonSimpleFast(int size_inicial, double lambda, double probabilidadmale, 
+                           int max_generations, std::vector<std::pair<ll, ll>>& historial) {
+    
+    // Limpiamos el historial para esta corrida
+    historial.clear();
+    historial.reserve(max_generations); // Reservamos memoria para evitar realojamientos
+
+    double probabilidadfemale = 1.0 - probabilidadmale;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    // --- Estado inicial ---
+    ll current_males = size_inicial / 2;
+    ll current_females = size_inicial - current_males;
+    
+    int g = 0;
+    bool seExtinguio = false;
+
+    // Guardamos el estado inicial (Generación 0)
+    historial.push_back({current_males, current_females});
+
+    while (g < max_generations && !seExtinguio) {
+        
+        // --- FORMAR PAREJAS ---
+        // Usamos el modelo de apareamiento monogámico limitado por el sexo minoritario
+        ll cantidadParejas = std::min(current_males, current_females);
+
+        if (cantidadParejas <= 0) {
+            seExtinguio = true;
+            break;
+        }
+
+        // --- REPRODUCCIÓN (Suma de Poisson) ---
+        // Basado en la propiedad: Sum(Pois(l1) + Pois(l2) ... Pois(ln)) = Pois(n * l)
+        double lambda_total = cantidadParejas * lambda;
+        
+        std::poisson_distribution<ll> dist_males(lambda_total * probabilidadmale);
+        std::poisson_distribution<ll> dist_females(lambda_total * probabilidadfemale);
+
+        // Generar conteos de la siguiente generación de golpe
+        current_males = dist_males(gen);
+        current_females = dist_females(gen);
+
+        // Registrar datos
+        historial.push_back({current_males, current_females});
+        
+        if (current_males == 0 && current_females == 0) {
+            seExtinguio = true;
+        }
+
+        g++;
+    }
+
+    return g;
+}
