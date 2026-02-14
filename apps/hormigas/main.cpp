@@ -52,16 +52,17 @@ int main( ){
     const float dR = 0.04f;      // muerte Recolectoras
 
     std::cout << "3. Creando paneles..." << std::endl;
-    // --- paneles----
-    Panel panelG(window, Tema::c("guerreras"), "Poblacion de Guerreras G(t)", 4,3 );
+    // --- paneles derehca----
+    Panel panelG(window, Tema::c("guerreras"), "Poblacion de Guerreras G(t)", 3,3 );
     panelG.positionAbsoluta(Ubicacion::ArribaDer);
 
-    Panel panelR(window,  Tema::c("recolectoras"), "Poblacion de Recolectoras R(t)", 4,3  );
+    Panel panelR(window,  Tema::c("recolectoras"), "Poblacion de Recolectoras R(t)", 3,3  );
     panelR.positionRelativa(RelativoA::Abajo, panelG);
 
-    Panel panelO(window,  Tema::c("obreras"), "Poblacion de Obreras O(t)", 4,3 );
+    Panel panelO(window,  Tema::c("obreras"), "Poblacion de Obreras O(t)", 3,3 );
     panelO.positionRelativa(RelativoA::Abajo, panelR);
-
+    
+     // --- paneles izquieda----
     Panel panelfOG(window, Tema::c("color1"), "Espacio Fase (O, G)", 6, 4);
     panelfOG.positionAbsoluta(Ubicacion::ArribaIzq);
 
@@ -74,17 +75,25 @@ int main( ){
     Panel panelCirc(window,  Tema::c("rojo"), "Poblacion de Hormigas", 3, 2);
     panelCirc.positionRelativa(RelativoA::Abajo, panelfOR);
 
-   
+    // --- paneles centro----
+    Panel panelTriple(window, Tema::c("celeste"),"Poblacion de Hormigas", 3, 3); 
+    panelTriple.positionRelativa(RelativoA::Izq  , panelG);
     
     
     // --- graficas respecto a tiempo y respecot a fase ---
     auto* graphG = panelG.crearContenido<GraficaTiempo>(Tema::c("guerreras"));
     auto* graphR = panelR.crearContenido<GraficaTiempo>(Tema::c("recolectoras"));
     auto* graphO = panelO.crearContenido<GraficaTiempo>(Tema::c("obreras"));
+
+    auto* graphTriple = panelTriple.crearContenido<GraficaTiempo>(Tema::c("guerreras"));
+    graphTriple -> agregarSerie("guerreras",Tema::c("guerreras"));
+    graphTriple -> agregarSerie("recolectoras",Tema::c("recolectoras"));
+    graphTriple -> agregarSerie("obreras",Tema::c("obreras"));
     
-    graphG -> configurarMaxPoints(1000);
-    graphR -> configurarMaxPoints(1000);
-    graphO -> configurarMaxPoints(1000);
+    graphTriple -> configurarMaxPoints(5000);
+    graphG -> configurarMaxPoints(5000);
+    graphR -> configurarMaxPoints(5000);
+    graphO -> configurarMaxPoints(5000);
 
     auto* faseOG = panelfOG.crearContenido<GraficaEspacioFase>(Tema::c("color1"));
     auto* faseOR = panelfOR.crearContenido<GraficaEspacioFase>(Tema::c("color2"));
@@ -105,7 +114,7 @@ int main( ){
     //  (Paso fijo de 0.1s)
     sf::Clock clock;
     sf::Time accumulator = sf::Time::Zero;
-    sf::Time ups = sf::seconds(0.01f); // Update por segundo
+    sf::Time ups = sf::seconds(0.008f); // Update por segundo
     // ups = sf::seconds(0.5f); // Update por segundo
 
     std::cout << "5. Inicializando simulacion   ..." << std::endl;
@@ -141,6 +150,10 @@ int main( ){
             graphG -> addValue(G);
             graphR -> addValue(R);
 
+            graphTriple -> addValue(O, "obreras");
+            graphTriple -> addValue(G, "guerreras");
+            graphTriple -> addValue(R, "recolectoras");
+
             faseOG -> addValue(O,G);
             faseOR -> addValue(O,R);
             faseRG -> addValue(R,G);
@@ -163,6 +176,8 @@ int main( ){
         panelfRG.draw();
 
         panelCirc.draw();
+
+        panelTriple.draw();
 
         window.display();
     }

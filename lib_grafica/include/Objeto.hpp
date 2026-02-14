@@ -17,7 +17,7 @@ public:
 
     // buscar fuente
     static void cargarFuenteGlobal() {
-        if( fuenteCargada ) return; // Si ya se cargó, no hacer nada
+        if( fuenteCargada ) return; // Si ya se cargo, no hacer nada
 
         std::vector<std::string> rutas = {
             "../../assets/fonts/Roboto.ttf",

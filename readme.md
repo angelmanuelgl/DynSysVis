@@ -21,12 +21,16 @@ Está diseñada para integrarse fácilmente en simulaciones complejas, permitien
 
 ![Image](https://github.com/user-attachments/assets/6257ad01-88e9-4828-8d25-a0eb1c262ee9)
 
-![Image](https://github.com/user-attachments/assets/eccc5708-41f1-4552-890b-d635975f7a75)
+
 
 **Ecuaciones Diferenciales De Segundo Orde (Pendulo Simple con resistencia al aire)**
 
 ![Image](https://github.com/user-attachments/assets/f2ebe176-b8e2-4021-9a7c-a3fe4edd0fc4)
 
+
+**Procesos Estocasticos (SpatialBranchingProcesses)**
+
+![Image](https://github.com/user-attachments/assets/63f04406-5a85-4423-8a49-52073ea1c5de)
 
 
 
