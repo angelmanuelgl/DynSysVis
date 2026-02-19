@@ -2,10 +2,11 @@
     * github: https://github.com/angelmanuelgl
     * web: https://angelmanuelgl.github.io/
     * 
-    * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
+    * - - - - - - -  -  DynSysVis  - - - - - - - - - - 
+    * Dynamical System Visualizer Real-Time
     * libreria de herramientas graficas para monitoreo de datos 
-    * en tiempo real y comportamiento de sistemas complejos.
- */
+    * y comportamiento de sistemas complejos en tiempo Real.
+*/
 /*  GEOMETRIA.cpp
     generacion de formas procedimentales y 
     gestion de paneles dinamicos con bordes redondeados
@@ -13,7 +14,7 @@
 
 #include "geometria.hpp"
 
-
+namespace dsv{
 /*
     --- generar cordenadas ---
     la idea es no estar almacenando cordenadas si non poder calcualrlas en tiempo real
@@ -92,3 +93,5 @@ void RectanguloRedondeado::draw( sf::RenderWindow& window, const sf::Transform& 
     window.draw(contorno, transform);
 }
 
+// end dsv
+}

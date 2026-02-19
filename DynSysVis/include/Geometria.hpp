@@ -2,10 +2,12 @@
     * github: https://github.com/angelmanuelgl
     * web: https://angelmanuelgl.github.io/
     * 
-    * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
+    * - - - - - - -  -  DynSysVis  - - - - - - - - - - 
+    * Dynamical System Visualizer Real-Time
     * libreria de herramientas graficas para monitoreo de datos 
-    * en tiempo real y comportamiento de sistemas complejos.
+    * y comportamiento de sistemas complejos en tiempo Real.
 */
+
 /*  GEOMETRIA.hpp
     generacion de formas procedimentales 
     rectangulos redondeados
@@ -17,49 +19,51 @@
 #include <cmath>
 #include <algorithm>
 
-// --- estructuras euxiliares ---
-struct Vector2f { 
-    float x, y;
-    Vector2f operator+(const Vector2f& other) const { return {x + other.x, y + other.y}; }
-    operator sf::Vector2f() const { return sf::Vector2f(x, y); }
-};
+namespace dsv{
 
-struct generadorCirculo {
-    float radio;
-    generadorCirculo(float r) : radio(r) {}
-    sf::Vector2f getPuntoByAngulo(float angulo) const;
-};
+    // --- estructuras euxiliares ---
+    struct Vector2f { 
+        float x, y;
+        Vector2f operator+(const Vector2f& other) const { return {x + other.x, y + other.y}; }
+        operator sf::Vector2f() const { return sf::Vector2f(x, y); }
+    };
 
-struct generadorRectangulo {
-    sf::Vector2f size;
-    float radio;
-    uint32_t calidad_arco;
-    generadorCirculo circleGen;
-    sf::Vector2f centers[4];
+    struct generadorCirculo {
+        float radio;
+        generadorCirculo(float r) : radio(r) {}
+        sf::Vector2f getPuntoByAngulo(float angulo) const;
+    };
 
-    generadorRectangulo(sf::Vector2f sz, float r, uint32_t q);
-    sf::Vector2f getPunto(uint32_t i) const;
-};
+    struct generadorRectangulo {
+        sf::Vector2f size;
+        float radio;
+        uint32_t calidad_arco;
+        generadorCirculo circleGen;
+        sf::Vector2f centers[4];
 
-// funciones globales
-sf::VertexArray generarRectanguloRelleno(sf::Vector2f size, float radio, uint32_t calidad, sf::Color color);
+        generadorRectangulo(sf::Vector2f sz, float r, uint32_t q);
+        sf::Vector2f getPunto(uint32_t i) const;
+    };
 
-void generarBorde(sf::VertexArray& vertex_array, sf::Vector2f position, sf::Vector2f size, 
-                  float radio, float grosor, uint32_t calidad, sf::Color color);
+    // funciones globales
+    sf::VertexArray generarRectanguloRelleno(sf::Vector2f size, float radio, uint32_t calidad, sf::Color color);
 
-// el dibujo de lo que sera el poanel un rectangulo con esquinaws redondeadas
+    void generarBorde(sf::VertexArray& vertex_array, sf::Vector2f position, sf::Vector2f size, 
+                    float radio, float grosor, uint32_t calidad, sf::Color color);
 
-class  RectanguloRedondeado{
-private:
-    sf::VertexArray background;  
-    sf::VertexArray contorno;
-public:
-    void generar(sf::Vector2f size, float radio, sf::Color bgColor, sf::Color extColor);
-    
+    // el dibujo de lo que sera el poanel un rectangulo con esquinaws redondeadas
 
-    void draw( sf::RenderWindow& window, const sf::Transform& transform);
-};
+    class  RectanguloRedondeado{
+    private:
+        sf::VertexArray background;  
+        sf::VertexArray contorno;
+    public:
+        void generar(sf::Vector2f size, float radio, sf::Color bgColor, sf::Color extColor);
+        
 
+        void draw( sf::RenderWindow& window, const sf::Transform& transform);
+    };
 
-
+// termina dsv
+}
 #endif

@@ -2,10 +2,12 @@
     * github: https://github.com/angelmanuelgl
     * web: https://angelmanuelgl.github.io/
     * 
-    * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
+    * - - - - - - -  -  DynSysVis  - - - - - - - - - - 
+    * Dynamical System Visualizer Real-Time
     * libreria de herramientas graficas para monitoreo de datos 
-    * en tiempo real y comportamiento de sistemas complejos.
+    * y comportamiento de sistemas complejos en tiempo Real.
 */
+
 /*  GRAFICOCIRCULAR.hpp
     frafica circular (tipo pastel o dona)
     ->>. pie charts
@@ -26,6 +28,7 @@
 #include <algorithm>
 #include <cmath>
 
+namespace dsv{
 
 class GraficoCircular : public Objeto{
 protected:
@@ -68,8 +71,7 @@ public:
     sf::Vector2f puntoEnCirculo(sf::Vector2f centro, float radio, float grados );
     void limpiarGeometria();
     void reiniciar();
-    void addValue(float valor);
-    void addValues(const std::vector<float>& vals);
+    void push_back(const std::vector<float>& vals);
 
     /* ---  GENERAR RELLENO CONTORNO --- */
     sf::VertexArray crearBordeRadial(sf::Vector2f centro, float rInt, float rExt, 
@@ -88,4 +90,7 @@ public:
 
 };
 
-#endif // GRAFICOCIRCULAR_HPP
+// end dvs
+}
+
+#endif 

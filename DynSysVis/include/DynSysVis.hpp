@@ -7,6 +7,7 @@
     Dynamical System Visualizer RT
     Dynamical System Visualizer
     DynSysVis
+    dsv
     
 */
 /*  
@@ -19,6 +20,7 @@
 
 #include "Geometria.hpp"
 
+#include "Tablero.hpp"
 #include "Panel.hpp" // Objeto Geoemtria / Titulo
 
 #include "logger.hpp"
@@ -27,5 +29,6 @@
 #include "Temas.hpp"
 #include "GraficoCircular.hpp"
 #include "Titulo.hpp"
+
 
 #endif

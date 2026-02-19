@@ -2,19 +2,20 @@
     * github: https://github.com/angelmanuelgl
     * web: https://angelmanuelgl.github.io/
     * 
-    * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
+    * - - - - - - -  -  DynSysVis  - - - - - - - - - - 
+    * Dynamical System Visualizer Real-Time
     * libreria de herramientas graficas para monitoreo de datos 
-    * en tiempo real y comportamiento de sistemas complejos.
+    * y comportamiento de sistemas complejos en tiempo Real.
 */
 /*  GRAFICOCIRCULAR.hpp
-    frafica circular (tipo pastel o dona)
+    ffrafica circular (tipo pastel o dona)
     ->>. pie charts
     
 */
 
 #include "GraficoCircular.hpp"
 
-
+namespace dsv{
 /*  
     CLASE GraficoCircular
 */
@@ -57,12 +58,7 @@ void GraficoCircular::reiniciar(){
 }
 
 // --- agregar valores --- 
-void GraficoCircular::addValue(float valor){
-    // el problema es que hay que resetear manuealmente
-    valores.push_back(valor);
-    hayAlgunCambio = true;
-}
-void GraficoCircular::addValues(const std::vector<float>& vals){
+void GraficoCircular::push_back(const std::vector<float>& vals){
     reiniciar();
     for( const auto& v : vals ) valores.push_back(v);
     hayAlgunCambio = true;
@@ -198,4 +194,9 @@ void GraficoCircular::draw(sf::RenderWindow& window, sf::RenderStates states, sf
     for( const auto& borde : bordesRadiales) window.draw(borde, states);
     // window.draw(background, states);
     // window.draw(contorno, states);
+}
+
+
+
+// end dsv
 }

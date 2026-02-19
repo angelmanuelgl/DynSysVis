@@ -2,10 +2,12 @@
     * github: https://github.com/angelmanuelgl
     * web: https://angelmanuelgl.github.io/
     * 
-    * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
+    * - - - - - - -  -  DynSysVis  - - - - - - - - - - 
+    * Dynamical System Visualizer Real-Time
     * libreria de herramientas graficas para monitoreo de datos 
-    * en tiempo real y comportamiento de sistemas complejos.
+    * y comportamiento de sistemas complejos en tiempo Real.
 */
+
 /*  GEOMETRIA.hpp
     sistema de clases base para graficar
     clases derivadas: para la visualización de series temporales  
@@ -26,6 +28,8 @@
 #include <map>          // para las series
 #include <functional>   //  mapearPunto
 
+
+namespace dsv{
 /*  
     --- --- --- --- --- --- --- --- ---     
     --- --- --- AUXILIARES  --- --- --- 
@@ -53,6 +57,7 @@ private:
 public:
     // constructores
     Serie() : nombre(""), color(sf::Color::White), maxPoints(500) {}
+
     Serie(std::string nombre, sf::Color color, unsigned int maxPts) 
         : nombre(nombre), color(color), maxPoints(maxPts){}
 
@@ -124,7 +129,7 @@ public:
     virtual void recalcularExtremos(void) = 0;
 
     // interactuar con las series
-    void addValueGenerico(sf::Vector2f p, std::string clave ="");
+    void push_back_Gen(sf::Vector2f p, std::string clave ="");
     void agregarSerie(std::string nombre, sf::Color color );
     void configurarMaxPoints(int mp);
 
@@ -162,10 +167,10 @@ private:
     float contadorSegundos;
     
 public:
-    GraficaTiempo(sf::Color color);
+    GraficaTiempo(sf::Color color = sf::Color::Blue);
     // --- datos ---
     void recalcularExtremos(void) override;
-    void addValue(float val, std::string clave ="");
+    void push_back(float val, std::string clave ="");
 };
 
 class GraficaEspacioFase : public GraficaBase {
@@ -173,10 +178,13 @@ private:
     //
 
 public:
-    GraficaEspacioFase(sf::Color color);
+    GraficaEspacioFase(sf::Color color = sf::Color::Blue );
     // --- datos ---
     void recalcularExtremos(void) override;
-    void addValue(float x, float y, std::string clave ="");
+    void push_back(float x, float y, std::string clave ="");
 };
 
+
+// end dvs
+}
 #endif

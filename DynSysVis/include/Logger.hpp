@@ -1,3 +1,13 @@
+/*  * autor: Angel Manuel Gonzalez Lopez 
+    * github: https://github.com/angelmanuelgl
+    * web: https://angelmanuelgl.github.io/
+    * 
+    * - - - - - - -  -  DynSysVis  - - - - - - - - - - 
+    * Dynamical System Visualizer Real-Time
+    * libreria de herramientas graficas para monitoreo de datos 
+    * y comportamiento de sistemas complejos en tiempo Real.
+*/
+
 #ifndef DSV_LOGGER_HPP
 #define DSV_LOGGER_HPP
 
@@ -5,7 +15,7 @@
 #include <string>
 #include <filesystem>
 
-namespace DSV {
+namespace dsv {
 
     class Logger {
     public:
@@ -36,10 +46,10 @@ namespace DSV {
 
 // --- MACROS DE ACCESO (Aquí está el truco profesional) ---
 #ifdef DSV_DEBUG
-    #define DSV_LOG_INFO(m)    DSV::Logger::Log(DSV::Logger::Level::INFO,    m, __FILE__, __LINE__)
-    #define DSV_LOG_SUCCESS(m) DSV::Logger::Log(DSV::Logger::Level::SUCCESS, m, __FILE__, __LINE__)
-    #define DSV_LOG_WARN(m)    DSV::Logger::Log(DSV::Logger::Level::WARN,    m, __FILE__, __LINE__)
-    #define DSV_LOG_ERROR(m)   DSV::Logger::Log(DSV::Logger::Level::CRITIC,  m, __FILE__, __LINE__)
+    #define DSV_LOG_INFO(m)    dsv::Logger::Log(dsv::Logger::Level::INFO,    m, __FILE__, __LINE__)
+    #define DSV_LOG_SUCCESS(m) dsv::Logger::Log(dsv::Logger::Level::SUCCESS, m, __FILE__, __LINE__)
+    #define DSV_LOG_WARN(m)    dsv::Logger::Log(dsv::Logger::Level::WARN,    m, __FILE__, __LINE__)
+    #define DSV_LOG_ERROR(m)   dsv::Logger::Log(dsv::Logger::Level::CRITIC,  m, __FILE__, __LINE__)
 #else
     // Si no estamos en modo debug, las macros no hacen nada (cero impacto en rendimiento)
     #define DSV_LOG_INFO(m)

@@ -2,26 +2,49 @@
     * github: https://github.com/angelmanuelgl
     * web: https://angelmanuelgl.github.io/
     * 
-    * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
+    * - - - - - - -  -  DynSysVis  - - - - - - - - - - 
+    * Dynamical System Visualizer Real-Time
     * libreria de herramientas graficas para monitoreo de datos 
-    * en tiempo real y comportamiento de sistemas complejos.
+    * y comportamiento de sistemas complejos en tiempo Real.
 */
 /*  PANEL.hpp
     gestion de paneles dinamicos
     posicionamiento y obtienen mas
+
+
+    el gestor del contenido, esto unifica
+    -> objeto generico
+    -> titulo
+    -> posciion
 */
 
 
 #include "panel.hpp"
 
-
+namespace dsv{
 /*
     STRUCT PANEL
     generar paneles dinamicos
 */
-Panel::Panel(sf::RenderWindow& window_,  sf::Color extColor,  
-            const std::string& tituloPanel, double nx, double ny , sf::Color bgColor):
-    window(window_) {   
+Panel::Panel(sf::RenderWindow& window_,  const std::string& tituloPanel, sf::Color extColor,  
+        double nx, double ny , sf::Color bgColor):
+    window(window_), extColor(extColor), bgColor(bgColor) {   
+    
+    setSize(nx,ny);
+
+    // poner fuente por defecto 
+    yafuenteCargada = false;
+    if( tituloPanel != "") {
+        cargarFuenteSiFalta();
+        ponerTitulo(tituloPanel, fuentePredeterminada);
+    }
+   
+
+    elMarco.generar(size, radio, bgColor, extColor);
+    
+}
+
+void Panel::setSize(double nx, double ny){
     // --- calcular el tamano ---
     sf::Vector2u windowSize = window.getSize();
     
@@ -40,17 +63,7 @@ Panel::Panel(sf::RenderWindow& window_,  sf::Color extColor,
     float y = (disponibleY - huecosY) / ny;
     
     size = {x, y};
-
-    // generar 
-    yafuenteCargada = false;
-    if( tituloPanel != "") {
-        cargarFuenteSiFalta();
-        ponerTitulo(tituloPanel, fuentePredeterminada);
-    }
-   
-
     elMarco.generar(size, radio, bgColor, extColor);
-    
 }
 
 void Panel::setPosition(float x, float y) {
@@ -143,7 +156,10 @@ void Panel::ponerTitulo(const std::string& texto, const sf::Font& fuente){
 /*
     como intertactua el panel con sus elementoss
 */
-void Panel::setContenido(std::unique_ptr<Objeto> nuevoContenido) {
+void Panel::setContenido(std::unique_ptr<Objeto> nuevoContenido ){
     contenido = std::move(nuevoContenido);
 }
 
+
+// end dsv
+}

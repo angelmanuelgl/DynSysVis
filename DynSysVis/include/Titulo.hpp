@@ -2,9 +2,10 @@
     * github: https://github.com/angelmanuelgl
     * web: https://angelmanuelgl.github.io/
     * 
-    * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
+    * - - - - - - -  -  DynSysVis  - - - - - - - - - - 
+    * Dynamical System Visualizer Real-Time
     * libreria de herramientas graficas para monitoreo de datos 
-    * en tiempo real y comportamiento de sistemas complejos.
+    * y comportamiento de sistemas complejos en tiempo Real.
 */
 /*  TITULO.hpp
     gestion de titulo
@@ -13,6 +14,8 @@
 */
 #ifndef TITULO_HPP
 #define TITULO_HPP
+
+namespace dsv{
 
 class Titulo{
 private:
@@ -52,4 +55,7 @@ public:
     }
 };
 
+
+// end dvs
+}
 #endif

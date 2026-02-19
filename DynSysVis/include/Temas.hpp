@@ -2,9 +2,10 @@
     * github: https://github.com/angelmanuelgl
     * web: https://angelmanuelgl.github.io/
     * 
-    * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
+    * - - - - - - -  -  DynSysVis  - - - - - - - - - - 
+    * Dynamical System Visualizer Real-Time
     * libreria de herramientas graficas para monitoreo de datos 
-    * en tiempo real y comportamiento de sistemas complejos.
+    * y comportamiento de sistemas complejos en tiempo Real.
 */
 /*  Temas.hpp
     sirvira para gestionar colores generales, 
@@ -25,7 +26,49 @@
 
 // nota no usa enum class porque aqui guardamos info
 // Temas.hpp
-namespace Tema{
+
+namespace dsv {
+
+namespace Color{
+    const sf::Color rojo(255, 100, 130, 255);
+    const sf::Color naranja(255, 160, 60, 255);
+    const sf::Color amarillo(255, 235, 100, 255);
+    const sf::Color verde(100, 255, 170, 255);
+    const sf::Color aqua(80, 230, 210, 255);     // Nuevo
+    const sf::Color celeste(130, 245, 255, 255);
+    const sf::Color cian(100, 210, 255, 255);
+    const sf::Color azul(110, 170, 255, 255);
+    const sf::Color violeta(160, 110, 255, 255);
+    const sf::Color morado(190, 130, 255, 255);
+    const sf::Color rosa(255, 80, 140, 255);
+    const sf::Color marron(160, 110, 90, 255);    // Nuevo
+
+    // --- Acento / Claros (Desaturados/Pastel) ---
+    const sf::Color rojo_l(214, 122, 131, 255);
+    const sf::Color naranja_l(235, 165, 145, 255);
+    const sf::Color amarillo_l(255, 225, 160, 255);
+    const sf::Color verde_l(185, 212, 160, 255);
+    const sf::Color aqua_l(160, 210, 200, 255);
+    const sf::Color cian_l(155, 210, 225, 255);
+    const sf::Color azul_l(150, 180, 210, 255);
+    const sf::Color morado_l(205, 165, 195, 255);
+    const sf::Color rosa_l(255, 150, 180, 255);   // Ajustado para ser más claro
+    const sf::Color marron_l(190, 155, 140, 255);
+
+    // --- Escala de Grises y Neutros ---
+    const sf::Color blanco(255, 255, 255, 255);
+    const sf::Color gris_claro(167, 169, 171, 255); // grey_40
+    const sf::Color gris(135, 137, 140, 255);       // grey_56
+    const sf::Color gris_oscuro(105, 106, 108, 255); // grey_72
+    const sf::Color fondo_panel(69, 69, 71, 255);    // dark_grey
+    const sf::Color fondo_oscuro(30, 31, 34, 255);   // Tono típico de dashboard
+    const sf::Color negro(0, 0, 0, 255);
+
+    // --- Variantes Extra para Gráficos (Muted Colors) ---
+    const sf::Color verde_bosque(75, 140, 100, 255);
+    const sf::Color azul_noche(60, 80, 120, 255);
+    const sf::Color terracota(180, 90, 80, 255);
+    const sf::Color oro(215, 170, 70, 255);
     
     //  mapa  se guardan todos los colores del txt
     inline std::map<std::string, sf::Color> colores;
@@ -143,5 +186,5 @@ namespace Tema{
     }
 }
 
-
+}
 #endif

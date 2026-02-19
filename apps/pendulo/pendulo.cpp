@@ -1,71 +1,64 @@
 /*  * autor: Angel Manuel Gonzalez Lopez 
     * github: https://github.com/angelmanuelgl
-    * web: https://angelmanuelgl.github.io/
-    * 
-    * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
-    * libreria de herramientas graficas para monitoreo de datos 
-    * en en tiempo real y comportamiento de sistemas complejos.
- */
+    * web: https://angelmanuelgl.github.io/ 
+    
+    * LIBRERIA DynSysVis RT
+*/
 /*  MAIN.cpp
-    ejemplo para usar mi libreria InsightRT
+    ejemplo para usar mi libreria
     
     APLICACION: pendulo simple
-                ECUACION DIFERENCIABLE DE SEGUNDO ORDEN 
+    ECUACION DIFERENCIABLE DE SEGUNDO ORDEN 
+
+    ejemplo usando dsv::Tablero
+    ventajas: menor codigo, al declarar a la vez panel y contenido
+        ya no te encargas de los draw
 */
 
 #include <SFML/Graphics.hpp>
 #include <cmath>
-#include <vector>
-#include <algorithm>
-
 #include "DynSysVis.hpp"
 
+
+// using namespace dsv;
 int main( ){
  
-    // --- cargar colores ---
-    Tema::cargar("assets/config/colores.txt");
+    // --- cargar colores --- DSV
+    dsv::Color::cargar("assets/config/colores.txt");
 
-    // --- configurar ventana ---
+    // --- configurar ventana --- SFML
     sf::RenderWindow window;
-    Sistema::inicializarVentana(window, "Simulación de Hormigas - Tesis");
+    dsv::Sistema::inicializarVentana(window, "DynSysVis RT - Péndulo Simple");
+
+    // --- tablero con datos --- DSV
+    dsv::Tablero tablero(window);
 
 
-    // --- Parametros del Pendulo ---
+    // --- parametros del Pendulo ---
     float theta = 1.5f;      // angulo inicial (aprox 85 grados)
     float omega = 0.0f;      // velocidad angular inicial
     const float g = 9.81f;   // gravedad
     const float L = 200.0f;  // longitud del pendulo (en pixeles para visualizacion)
     const float amortiguamiento = 0.999f; // opcional: para que se detenga poco a poco
 
-    // --- paneles --- 
-    Panel panelTheta(window, Tema::c("rojo"), "Angulo Theta(t)", 2,4 );
-    panelTheta.positionAbsoluta(Ubicacion::ArribaDer);
-    
-    Panel panelOmega(window, Tema::c("naranja"), "Velocidad Omega(t)", 2,4 );
-    panelOmega.positionRelativa(RelativoA::Abajo, panelTheta);
-    
-    Panel panelFase(window, Tema::c("violeta"), "Fase (omega , theta)", 2,2 );
-    panelFase.positionAbsoluta(Ubicacion::ArribaIzq);
-    
-    // --- graficas y contenido en general ---
-    auto* ptrTheta = panelTheta.crearContenido<GraficaTiempo>(Tema::c("rojo"));
-    auto* ptrOmega = panelOmega.crearContenido<GraficaTiempo>(Tema::c("naranja"));
-    auto* ptrFase  = panelFase.crearContenido<GraficaEspacioFase>(Tema::c("violeta"));
+    // --- paneles ---  DSV
+    auto gTheta = tablero.add<dsv::GraficaTiempo>("Angulo Theta(t)", dsv::Color::c("rojo"), dsv::Color::c("rojo"));
+    auto gOmega = tablero.add<dsv::GraficaTiempo>("Velocidad Omega(t)", dsv::Color::c("naranja"),  dsv::Color::c("naranja"));
+    auto gFase  = tablero.add<dsv::GraficaEspacioFase>("Espacio de Fase", dsv::Color::c("violeta"), dsv::Color::c("violeta"));
 
+    gTheta.setPosition(dsv::Ubicacion::ArribaDer, 2,4);
+    gOmega.setPosition(dsv::RelativoA::Abajo, gTheta, 2,4 );
+    gFase.setPosition(dsv::Ubicacion::ArribaIzq, 2, 2);
 
-    // --- configurar limites -- 
-    // (opcional pero se ve mejor)
-    // ptrTheta -> ponerSombreado( true, false);
-    // graphTheta -> configurarLimites(-1,1, -1, 1);
-    ptrOmega -> configurarLimites( 0,0, -3, 3, true);
-    ptrFase -> configurarLimites(-3.2, 3.2, -2, 2 );
+    // --- acceder a metodos de los objetos -- DSV ( GraficaTiempo,GraficaEspacioFase , etc )
+    gOmega->configurarLimites(0, 0, -3, 3, true);
+    gFase->configurarLimites(-3.2, 3.2, -2, 2);
 
 
     // --- Control del tiempo ---
     sf::Clock clock;
     sf::Time accumulator = sf::Time::Zero;
-    sf::Time ups = sf::seconds(0.016f); // ~60 updates por segundo para suavidad
-    // sf::Time ups = sf::seconds(0.1f); // Update por segundo
+    sf::Time ups = sf::seconds(0.016f); //  Update por segundo
 
     while( window.isOpen() ){
         sf::Event event;
@@ -84,36 +77,15 @@ int main( ){
             theta += omega * dt;
 
             // --- actualizar graficas ---
-            ptrOmega->addValue(omega);
-            ptrTheta->addValue(theta);
-            ptrFase->addValue(omega, theta);
+            gOmega->push_back(omega);
+            gTheta->push_back(theta);
+            gFase->push_back(omega, theta);
 
             accumulator -= ups;
         }
 
-        // --- RENDERIZADO ---
-        window.clear(sf::Color(40, 40, 40));
-
-        // // dibujar el pendulo fisicamente
-        // sf::Vector2f origen(window.getSize().x / 4.0f, window.getSize().y / 2.0f);
-        // sf::Vector2f extremo(origen.x + L * std::sin(theta), origen.y + L * std::cos(theta));
-
-        // sf::Vertex linea[] = { sf::Vertex(origen), sf::Vertex(extremo, sf::Color::White) };
-        // window.draw(linea, 2, sf::Lines);
-
-        // sf::CircleShape masa(15.f);
-        // masa.setFillColor(sf::Color::Cyan);
-        // masa.setOrigin(15.f, 15.f);
-        // masa.setPosition(extremo);
-        // window.draw(masa);
-
-        // --- paneles y graficas y marco ---
-        // Cada panel dibuja: su marco , su contenido interno
-        panelTheta.draw();
-        panelOmega.draw();
-        panelFase.draw();
-
-
+        // --- RENDERIZADO --- DSV
+        tablero.draw();
         window.display();
     }
     return 0;

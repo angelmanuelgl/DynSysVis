@@ -2,13 +2,20 @@
     * github: https://github.com/angelmanuelgl
     * web: https://angelmanuelgl.github.io/
     * 
-    * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
+    * - - - - - - -  -  DynSysVis  - - - - - - - - - - 
+    * Dynamical System Visualizer Real-Time
     * libreria de herramientas graficas para monitoreo de datos 
-    * en tiempo real y comportamiento de sistemas complejos.
+    * y comportamiento de sistemas complejos en tiempo Real.
 */
 /*  PANEL.hpp
     gestion de paneles dinamicos
     posicionamiento y obtienen mas
+
+
+    el gestor del contenido, esto unifica
+    -> objeto generico
+    -> titulo
+    -> posciion
 */
 #ifndef PANEL_HPP
 #define PANEL_HPP
@@ -16,12 +23,15 @@
 
 #include "Geometria.hpp" // para que reconozca la clase de los rectangulos
 #include "Objeto.hpp" // para que conozca el Objeto generico 
-#include "Titulo.hpp" // para que conozca el Objeto generico 
+#include "Titulo.hpp" // para que conozca el titulo
 
 
 #include <SFML/Graphics.hpp>
 #include <memory>        // Para unique_ptr
 #include <iostream>     // Para manejo de errores
+
+
+namespace dsv{
 
 enum class Ubicacion {
     ArribaIzq, ArribaCentro, ArribaDer,
@@ -54,6 +64,8 @@ private:
     // para el recntauglo
     float radio = 20.0f;
     sf::Vector2f size;
+    sf::Color extColor;
+    sf::Color bgColor;
 
     // para titulo
     bool yafuenteCargada;
@@ -61,11 +73,13 @@ private:
 
 
 public:
-    Panel(sf::RenderWindow& window_, sf::Color extColor, 
+    Panel(sf::RenderWindow& window_, 
                 const std::string& tituloPanel ="", 
+                sf::Color extColor = sf::Color::White,
                 double nx = 3, double ny = 4, // para tamano
                 sf::Color bgColor=sf::Color(30,30,30) ); // color de fondo
 
+    void setSize(double nx, double ny);
 
     sf::Vector2f getPosition() const { return pos_actual; }
     sf::Vector2f getSize() const { return size; }
@@ -104,5 +118,6 @@ public:
     
 };
 
-
+// end dsv
+}
 #endif

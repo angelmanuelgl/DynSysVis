@@ -103,9 +103,11 @@ g++ apps/GaltonWatson/simulacionconArbol.cpp build/Geometria.o build/Graficas.o 
 
 ### Usando MakeFIle
 
-Para faciliatar esto puedes usar makefile, solo asegurate de tene risntalado ``pacman -S mingw-w64-ucrt-x86_64-make``
+Para faciliatar esto puedes usar makefile, solo asegurate de tener instalado ``pacman -S mingw-w64-ucrt-x86_64-make``
 
-Una vez que ejecutas ``mingw32-make`` dentro de lib_grafica, se genera el archivo lib/libinsightrt.a.
+Una vez que ejecutas ``mingw32-make`` dentro de DynSysVis, se genera el archivo lib/libDynSysVis.a
+Para usar el modo log usar ``mingw32-make LOG=1 ``
+
 
 leugo compialr proyectos con
 ```

@@ -2,10 +2,11 @@
     * github: https://github.com/angelmanuelgl
     * web: https://angelmanuelgl.github.io/
     * 
-    * proyecto: InsightRT - - - - - - - - - - - - - - - - - - - 
+    * - - - - - - -  -  DynSysVis  - - - - - - - - - - 
+    * Dynamical System Visualizer Real-Time
     * libreria de herramientas graficas para monitoreo de datos 
-    * en tiempo real y comportamiento de sistemas complejos.
- */
+    * y comportamiento de sistemas complejos en tiempo Real.
+*/
 /*  Graficas.cpp
     sistema de clases base para graficar en el plano x y
     clases derivadas: 
@@ -15,6 +16,7 @@
 #include "Graficas.hpp"
 
 
+namespace dsv{
 /*  
     --- --- --- --- --- --- --- --- ---  --- --- ---     
     --- --- --- --- --- --- --- --- ---  --- --- ---     
@@ -157,7 +159,7 @@ GraficaBase::GraficaBase(unsigned int maxPts, sf::Color color)
 // --- --- --- --- --- --- --- --- ---
 // --- INTERACTUAR CON LAS SERIES ---
 // --- --- --- --- --- --- --- --- ---
-void GraficaBase::addValueGenerico(sf::Vector2f p, std::string clave) {
+void GraficaBase::push_back_Gen(sf::Vector2f p, std::string clave) {
     // usar la clave por defeto 
     if( clave == "" ){
         clave = "default";
@@ -365,7 +367,7 @@ GraficaTiempo::GraficaTiempo( sf::Color color)
 }
 
 
-void GraficaTiempo::addValue(float val , std::string clave){
+void GraficaTiempo::push_back(float val , std::string clave){
     
     std::string id = (clave == "") ? "default" : clave;
     
@@ -375,7 +377,7 @@ void GraficaTiempo::addValue(float val , std::string clave){
         x = series[id].getPuntos().back().x + 1;
     }
     
-    addValueGenerico({x, val}, id);
+    push_back_Gen({x, val}, id);
 }
 
 void GraficaTiempo::recalcularExtremos(void){
@@ -448,8 +450,8 @@ GraficaEspacioFase::GraficaEspacioFase( sf::Color color)
     ponerDesvanecido(true);
 }
 
-void GraficaEspacioFase::addValue(float x, float y , std::string clave){ 
-    addValueGenerico({x, y}, clave);
+void GraficaEspacioFase::push_back(float x, float y , std::string clave){ 
+    push_back_Gen({x, y}, clave);
 }
 void GraficaEspacioFase::recalcularExtremos(void){
      if(series.empty() ) return;
@@ -506,4 +508,9 @@ void GraficaEspacioFase::recalcularExtremos(void){
         lim.minY -= 1.0f;
         lim.maxY += 1.0f;
     }
+}
+
+
+
+// end dsv
 }
