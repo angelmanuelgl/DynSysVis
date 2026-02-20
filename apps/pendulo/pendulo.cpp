@@ -28,7 +28,7 @@ int main( ){
 
     // --- configurar ventana --- SFML
     sf::RenderWindow window;
-    dsv::Sistema::inicializarVentana(window, "DynSysVis RT - Péndulo Simple");
+    dsv::Sistema::inicializarVentana(window, "DynSysVis RT - PEndulo Simple");
 
     // --- tablero con datos --- DSV
     dsv::Layout miLayout = {
@@ -45,11 +45,12 @@ int main( ){
     const float g = 9.81f;   // gravedad
     const float L = 200.0f;  // longitud del pendulo (en pixeles para visualizacion)
     const float amortiguamiento = 0.995f; // opcional: para que se detenga poco a poco
+    float t = 0;
 
     // --- paneles ---  DSV
     auto gTheta = tablero.add<dsv::GraficaTiempo>("Angulo Theta(t)", dsv::Color::c("rojo"), "t", dsv::Color::c("rojo"));
     auto gOmega = tablero.add<dsv::GraficaTiempo>("Velocidad Omega(t)", dsv::Color::c("naranja"), "o",  dsv::Color::c("naranja"));
-    auto gFase  = tablero.add<dsv::GraficaEspacioFase>("Espacio de Fase", dsv::Color::c("violeta"), "f", dsv::Color::c("violeta"));
+    auto gFase  = tablero.add<dsv::EspacioFase2D>("Espacio de Fase", dsv::Color::c("violeta"), "f", dsv::Color::c("violeta"));
 
     // --- acceder a metodos de los objetos -- DSV ( GraficaTiempo,GraficaEspacioFase , etc )
     gOmega->configurarLimites(0, 0, -3, 3, true);
@@ -77,10 +78,11 @@ int main( ){
             omega += aceleracion * dt;
             omega *= amortiguamiento; // Descomentar para friccion
             theta += omega * dt;
+            t += dt;
 
             // --- actualizar graficas ---
-            gOmega->push_back(omega);
-            gTheta->push_back(theta);
+            gOmega->push_back(omega, t);
+            gTheta->push_back(theta, t);
             gFase->push_back(omega, theta);
 
             accumulator -= ups;

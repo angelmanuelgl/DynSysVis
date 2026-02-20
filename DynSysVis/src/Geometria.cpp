@@ -12,7 +12,7 @@
     gestion de paneles dinamicos con bordes redondeados
 */
 
-#include "geometria.hpp"
+#include "dsv/graphics2D/Geometria.hpp"
 
 namespace dsv{
 /*

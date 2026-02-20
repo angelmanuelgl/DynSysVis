@@ -8,6 +8,9 @@ build/
 # configuracion local
 .vscode/
 
+# pruebas
+.pruebasFast/
+
 # archivos temporales o antiguos
 
 

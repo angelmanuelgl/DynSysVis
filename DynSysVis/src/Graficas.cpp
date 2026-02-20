@@ -13,7 +13,7 @@
             -> funciones que dependen del tiempo
             -> retratos de fase 2D
 */
-#include "Graficas.hpp"
+#include "dsv/graphics2D/Graficas.hpp"
 
 
 namespace dsv{
@@ -24,19 +24,23 @@ namespace dsv{
     --- --- --- --- --- --- --- --- ---  --- --- ---     
     --- --- --- --- --- --- --- --- ---  --- --- ---
 */
-// En Graficas.hpp o .cpp
 void Serie::draw(sf::RenderWindow& window, sf::RenderStates states, 
                 std::function<sf::Vector2f(sf::Vector2f)> mapearPunto,
-                bool sombreado, bool desvanece, float valorReferenciaY ){
+                bool sombreado, bool desvanece, bool cabeza, float valorReferenciaY ){
     
-    if (puntos.empty()) return;
+    size_t n = puntos.size();
+    if (n == 0) return;
+    
+   
 
     // dibujar Sombreado (TriangleStrip)
-    if(sombreado ){
-        sf::VertexArray degradado(sf::TriangleStrip, puntos.size() * 2);
-        for (size_t i = 0; i < puntos.size(); i++) {
-            sf::Vector2f pPos = mapearPunto(puntos[i]);
-            sf::Vector2f pBase = mapearPunto({puntos[i].x, valorReferenciaY});
+    if( sombreado ){
+        sf::VertexArray degradado(sf::TriangleStrip, n * 2);
+        for (size_t i = 0; i < n; i++) {
+            sf::Vector2f puntoActual = puntos[i]; // ya devuelve sf::vector2f
+
+            sf::Vector2f pPos = mapearPunto(puntoActual);
+            sf::Vector2f pBase = mapearPunto({puntoActual.x, valorReferenciaY});
 
             degradado[2 * i].position = pPos;
             degradado[2 * i].color = sf::Color(color.r, color.g, color.b, color.a*80/255);
@@ -48,13 +52,14 @@ void Serie::draw(sf::RenderWindow& window, sf::RenderStates states,
     }
 
     // dibujar la linea principal
-    sf::VertexArray linea(sf::LineStrip, puntos.size());
-    for (size_t i = 0; i < puntos.size(); i++) {
-        linea[i].position = mapearPunto(puntos[i]);
+    sf::VertexArray linea(sf::LineStrip, n);
+    for (size_t i = 0; i < n; i++) {
+        sf::Vector2f puntoActual = puntos[i]; // ya devuelve sf::vector2f
+        linea[i].position = mapearPunto(puntoActual);
         
         sf::Color colFinal = color;
         if( desvanece ){
-            float factor = static_cast<float>(i) / static_cast<float>(puntos.size() - 1);
+            float factor = static_cast<float>(i) / static_cast<float>(n - 1);
             colFinal.a = static_cast<sf::Uint8>(color.a * factor);
         }
         linea[i].color = colFinal;
@@ -62,13 +67,16 @@ void Serie::draw(sf::RenderWindow& window, sf::RenderStates states,
     window.draw(linea, states);
 
     // dibujar punto caveza y desvanezimiento
-    if(desvanece ){
+    if( cabeza ){
         float radioPunto = 3.5f;
         sf::CircleShape cabeza(radioPunto);
 
         // el ultimo guardado es el primeor de hasta delante
         cabeza.setOrigin(radioPunto, radioPunto);
-        cabeza.setPosition(mapearPunto(puntos.back()));
+        
+        sf::Vector2f ultimoPunto = puntos.back();
+
+        cabeza.setPosition(mapearPunto(ultimoPunto) ) ;
         cabeza.setFillColor(color);
 
         // borde blanco p
@@ -78,54 +86,22 @@ void Serie::draw(sf::RenderWindow& window, sf::RenderStates states,
     }
 }
 
+
+
 void Serie::recalcularExtremos(void){
-    bool primero = true;
-    for( const auto& p : puntos ){
-        if( primero ){
-            misLimites = {p.x, p.x, p.y, p.y};
-            primero = false;
-        } else {
-            if( p.x < misLimites.minX ) misLimites.minX = p.x;
-            if( p.x > misLimites.maxX ) misLimites.maxX = p.x;
-            if( p.y < misLimites.minY ) misLimites.minY = p.y;
-            if( p.y > misLimites.maxY ) misLimites.maxY = p.y;
-        }
-    }
+    if( puntos.empty() ) return;
+    misLimites = puntos.getLimites();
 }
 
-void Serie::agregarPunto(sf::Vector2f p) {
-    
-    // ver si tendremosq ue recalcular
-    bool recalcularNecesario = false;
-    if( puntos.size() >= maxPoints ){
+void Serie::agregarPunto(sf::Vector2f p){
+    puntos.push(p.x, p.y);
 
-        sf::Vector2f elQueSeVaBorrar = puntos.front();
-        //! considerar usar arelglo circular O(n) -> O(1)
-        puntos.erase(puntos.begin());  
-
-        // si el punto era un extremos
-        if (elQueSeVaBorrar.x == misLimites.minX || elQueSeVaBorrar.x == misLimites.maxX ||
-            elQueSeVaBorrar.y == misLimites.minY || elQueSeVaBorrar.y == misLimites.maxY) {
-            recalcularNecesario = true;
-        }
-    }
-    
-    // agregar
-    puntos.push_back(p);
-
-    // recalclar si fuese encesario 
-    if (recalcularNecesario || !primerPuntoAgregado) {
-            // ! considerar usar heap O(n) -> O(log n)
-        recalcularExtremos();
-        primerPuntoAgregado = true;
-    } else {
-        // Solo expandir límites si el nuevo punto es mayor/menor
-        if (p.x < misLimites.minX) misLimites.minX = p.x;
-        if (p.x > misLimites.maxX) misLimites.maxX = p.x;
-        if (p.y < misLimites.minY) misLimites.minY = p.y;
-        if (p.y > misLimites.maxY) misLimites.maxY = p.y;
+    if( puntos.size() > maxPoints ){
+        puntos.pop();
     }
 
+    // limites en O(1)
+    misLimites = puntos.getLimites();
 }
 
 
@@ -166,13 +142,14 @@ void GraficaBase::push_back_Gen(sf::Vector2f p, std::string clave) {
     }
 
     // creae la serie si no existe
-    if (series.find(clave) == series.end()) {
+    if( series.find(clave) == series.end() ){
         series[clave] = Serie(clave, lineaResaltado, maxPoints);
     }
 
     // agregar
     series[clave].agregarPunto(p);
 }
+
 void GraficaBase::agregarSerie(std::string nombre, sf::Color color) {
     // Buscamos si ya existe para no borrar los puntos existentes
     auto it = series.find(nombre);
@@ -269,7 +246,7 @@ void GraficaBase::dibujarContenido(sf::RenderWindow& window, sf::RenderStates st
 
     // Dibujamos cada serie
     for (auto& [id, serie] : series) {
-        serie.draw(window, states, mapearPunto, sombreado, desvanece, valorRef);
+        serie.draw(window, states, mapearPunto, sombreado, desvanece,  cabeza, valorRef);
     }
 }
 
@@ -364,6 +341,11 @@ void GraficaBase::draw(sf::RenderWindow& window, sf::RenderStates states, sf::Ve
 GraficaTiempo::GraficaTiempo( sf::Color color)
     :GraficaBase(500, color) {    
     ponerSombreado(true, true);
+    ponerDesvanecido(false, false);
+    maxLimX = 20;// 20 segundos de largo
+
+    // la grafica tiempos e encarga de borrarlos si apsa de cierot tiempo
+    maxPoints = 1000000;
 }
 
 
@@ -374,21 +356,25 @@ void GraficaTiempo::push_back(float val , std::string clave){
     // obtenemos x / /  x es el tiempo (podira ser un contador o segundos)
     float x = 0;
     if (!series[id].vacia()) {
-        x = series[id].getPuntos().back().x + 1;
+        x = series[id].back().x + 1;
     }
     
     push_back_Gen({x, val}, id);
 }
 
+void GraficaTiempo::push_back(float val , float t, std::string clave){
+    push_back_Gen({t, val}, clave);
+}
+
 void GraficaTiempo::recalcularExtremos(void){
-    if(series.empty() ) return;
+    if( series.empty() ) return;
 
 
     bool primerSerie = true;
     for( auto const& [id, serie] : series ){
         if( serie.vacia() ) continue;
 
-        Limites limSerie = serie.getLimites();
+        Limites limSerie = serie.getLimites(); // ahora O(1)
 
         // la primer serie
         if( primerSerie ){
@@ -411,8 +397,24 @@ void GraficaTiempo::recalcularExtremos(void){
 
     // --- PERSONALZIACION EXTRA --- 
     
-    // x siempre llega hasta almenos maxPoints
-    if( lim.maxX < maxPoints ) lim.maxX = maxPoints; 
+    // x siempre llega hasta almenos maxLimX
+    if( lim.maxX < maxLimX ) lim.maxX = maxLimX; 
+    if( lim.maxX > maxLimX ) lim.minX = lim.maxX - maxLimX; 
+
+    // a todas las series le quitamos la cola
+    long long cnt = 0;
+    float limiteIzq = lim.minX;
+    for( auto& [id, serie] : series ){
+        while( !serie.vacia() && serie.front().x < limiteIzq  ){
+            
+            serie.pop();
+            cnt++;
+            if( cnt >= 100000 ){
+                DSV_LOG_ERROR("while ciclado");
+                break;
+            }
+        }
+    }
 
     // siempre graficar hasta el 0 Y (opcional)
     if( lim.minY > 0 ) lim.minY = 0; 
@@ -442,54 +444,74 @@ void GraficaTiempo::recalcularExtremos(void){
     GRAFICAS DE ESPACIO FASE
     agrega pares
 */
-GraficaEspacioFase::GraficaEspacioFase( sf::Color color)    
-    :GraficaBase(5000, color)
-{    
+EspacioFase2D::EspacioFase2D( sf::Color color)    
+    :GraficaBase(5000, color){    
     nombreEjeX = "X";
     nombreEjeY = "Y";
-    ponerDesvanecido(true);
+    ponerDesvanecido(true, true);
 }
 
-void GraficaEspacioFase::push_back(float x, float y , std::string clave){ 
+void EspacioFase2D::push_back(float x, float y , std::string clave){ 
     push_back_Gen({x, y}, clave);
 }
-void GraficaEspacioFase::recalcularExtremos(void){
+void EspacioFase2D::recalcularExtremos(void){
      if(series.empty() ) return;
 
-
+    Limites limAllSeries;
     bool primerSerie = true;
     for( auto const& [id, serie] : series ){
         if( serie.vacia() ) continue;
 
-        Limites limSerie = serie.getLimites();
+        Limites limSerie = serie.getLimites(); // ahora O(1)
 
         // la primer serie
         if( primerSerie ){
-            // x // se ajusta a la series
-            // lim.minX = limSerie.minX; 
-            // lim.maxX = limSerie.maxX; 
-            // // y // matiene el hitorico
-            // lim.maxY = limSerie.maxY; 
-            // lim.minY = limSerie.minY;
-
+            limAllSeries = limSerie;        
             primerSerie = false;
         } 
 
-        // las demas series
-        float m = 10; // margen
-        if( limSerie.minX +m < lim.minX) lim.minX = limSerie.minX +m;
-        if( limSerie.maxX +m > lim.maxX) lim.maxX = limSerie.maxX +m;
-        if( limSerie.minY +m < lim.minY) lim.minY = limSerie.minY +m;
-        if( limSerie.maxY +m > lim.maxY) lim.maxY = limSerie.maxY +m;
+
+        // actuaizar
+        if( limSerie.minX < limAllSeries.minX) limAllSeries.minX = limSerie.minX;
+        if( limSerie.maxX > limAllSeries.maxX) limAllSeries.maxX = limSerie.maxX;
+        if( limSerie.minY < limAllSeries.minY) limAllSeries.minY = limSerie.minY;
+        if( limSerie.maxY > limAllSeries.maxY) limAllSeries.maxY = limSerie.maxY;
         
     }
+    //  --- margen   los limites que dan las series ---
+    // 5% de margen
+    float my = 0.05 * (lim.maxY - lim.minY); // margen
+    float mx = 0.05 * (lim.maxX - lim.minX); // margen
     
+    // poco mas de margen
+    if( seguimiento ){
+        mx *= 2;
+        my *= 2;
+    }
+
+    limAllSeries = {   limAllSeries.minX-mx, limAllSeries.maxX+mx, limAllSeries.minY-my, limAllSeries.maxY+my };
+
+
+    // --- actualziar limites -- 
+
+    // si se ajusta siempre
+    if( seguimiento ){   
+        lim = limAllSeries;
+    }
+    // si solo crece
+    else{
+        if( limAllSeries.minX < lim.minX) lim.minX = limAllSeries.minX;
+        if( limAllSeries.maxX > lim.maxX) lim.maxX = limAllSeries.maxX;
+        if( limAllSeries.minY < lim.minY) lim.minY = limAllSeries.minY;
+        if( limAllSeries.maxY > lim.maxY) lim.maxY = limAllSeries.maxY;
+    }
+
 
     // --- PERSONALZIACION EXTRA --- 
 
     // siempre graficar hasta el 0 Y (opcional)
-    if( lim.minY > 0 ) lim.minY = 0; 
-    if( lim.maxY < 0 ) lim.maxY = 0;
+    // if( lim.minY > 0 ) lim.minY = 0; 
+    // if( lim.maxY < 0 ) lim.maxY = 0;
     
 
     // siempre graficar hasta el 0 X (opcional)

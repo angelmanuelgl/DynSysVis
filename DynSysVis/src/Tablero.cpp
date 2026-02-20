@@ -19,7 +19,7 @@
 */
 
 
-#include "Tablero.hpp"
+#include "dsv/interface/Tablero.hpp"
 
 
 namespace dsv {

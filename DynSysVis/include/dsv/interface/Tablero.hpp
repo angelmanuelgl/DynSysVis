@@ -7,23 +7,32 @@
     * libreria de herramientas graficas para monitoreo de datos 
     * y comportamiento de sistemas complejos en tiempo Real.
 */
-/*  Tablero.hpp
-    tiene 
+/*  Tablero.hpp // Layout y Tablero //
+    Layout
+        -> recibe arreglo de array con ids y lo convierte en dispocion de paneles
+
+    Tablero
+        -> gestioan agregar un panel y devuelve un objeto vista panel con contenido
+        -> recibe el Layout para decirle a los panels como posicionarse
+        -> se encarga de llamar .draw de los paneles  
+     
 */
 
 #ifndef TABLERO_HPP
 #define TABLERO_HPP
 
-#include "Vista.hpp"
-#include "Logger.hpp"
+// std y sfml
+#include <SFML/Graphics.hpp>
 #include <map>
 #include <vector>
 #include <string>
 
-#include <SFML/Graphics.hpp>
+// dsv
+#include "dsv/core/Logger.hpp"
+#include "dsv/interface/Vista.hpp"
 
 namespace dsv {
-struct Region { int fil, col, cnt_f, cnt_c, colsEnSuFila; };
+struct Region { int fil, col, cnt_f, cnt_c, colsEnSuFila; }; 
 
 struct Layout {
     int totalFilas = 0, totalCols = 0;

@@ -17,6 +17,10 @@
 #include "DynSysVis.hpp"
 
 using namespace dsv;
+
+
+
+
 int main( ){
     // --- cargar colores --- DSV
     dsv::Color::cargar("assets/config/colores.txt");
@@ -38,6 +42,7 @@ int main( ){
     float O = 60.0f;
     float G = 20.0f;
     float R = 10.0f;
+    float t = 0;
 
     const float bO = 0.05f;
     const float betaOG = 4.0f;
@@ -57,10 +62,10 @@ int main( ){
     auto obreras      = tablero.add<dsv::GraficaTiempo>("obreras", dsv::Color::verde, "o", dsv::Color::verde);
     auto total = tablero.add<dsv::GraficaTiempo>("Poblaciones Total", dsv::Color::celeste, "t" );
 
-    /// GraficaEspacioFase
-    auto OG = tablero.add<dsv::GraficaEspacioFase>("Espacio Fase (O, G)", dsv::Color::azul, "fa1", dsv::Color::azul );
-    auto OR = tablero.add<dsv::GraficaEspacioFase>("Espacio Fase (O, R)", dsv::Color::aqua, "fa2",   dsv::Color::aqua );
-    auto RG = tablero.add<dsv::GraficaEspacioFase>("Espacio Fase (R, G)", dsv::Color::cian, "fa3",   dsv::Color::cian );
+    /// EspacioFase2D
+    auto OG = tablero.add<dsv::EspacioFase2D>("Espacio Fase (O, G)", dsv::Color::azul, "fa1", dsv::Color::azul );
+    auto OR = tablero.add<dsv::EspacioFase2D>("Espacio Fase (O, R)", dsv::Color::aqua, "fa2",   dsv::Color::aqua );
+    auto RG = tablero.add<dsv::EspacioFase2D>("Espacio Fase (R, G)", dsv::Color::cian, "fa3",   dsv::Color::cian );
 
     /// GraficoCircular
     auto pie = tablero.add<dsv::GraficoCircular>("Poblacion de Hormigas", dsv::Color::aqua, "cir");
@@ -76,15 +81,15 @@ int main( ){
 
     
     /// acceder a metodos especificos de los objetos de los paneles
-    guerreras -> configurarMaxPoints(5000);
-    recolectoras -> configurarMaxPoints(5000);
-    obreras -> configurarMaxPoints(5000);
-    triple -> configurarMaxPoints(5000);
-    total -> configurarMaxPoints(5000);
+    // guerreras -> configurarMaxPoints(5000);
+    // recolectoras -> configurarMaxPoints(5000);
+    // obreras -> configurarMaxPoints(5000);
+    // triple -> configurarMaxPoints(5000);
+    // total -> configurarMaxPoints(5000);
 
-    OG -> configurarMaxPoints(5000);
-    OR -> configurarMaxPoints(5000);  
-    RG -> configurarMaxPoints(5000);
+    // OG -> configurarMaxPoints(5000);
+    // OR -> configurarMaxPoints(5000);  
+    // RG -> configurarMaxPoints(5000);
 
     // --- --- --- ---  Control del tiempo --- --- --- --- 
     //  (Paso fijo de 0.1s)
@@ -121,21 +126,21 @@ int main( ){
 
 
             // actualiza variables con metodo de Euler
-            float dt_val = ups.asSeconds();
-            O += dO * dt_val;
-            G += dG_dt * dt_val;
-            R += dR_dt * dt_val;
-
+            float dt = ups.asSeconds();
+            O += dO * dt;
+            G += dG_dt * dt;
+            R += dR_dt * dt;
+            t += dt;
            
             // agregar datos a graficas
-            guerreras -> push_back(G);
-            recolectoras -> push_back(R);
-            obreras -> push_back(O);
-            total -> push_back(O+G+R);
+            guerreras -> push_back(G, t);
+            recolectoras -> push_back(R, t);
+            obreras -> push_back(O, t);
+            total -> push_back(O+G+R, t);
 
-            triple -> push_back(O, "obreras");
-            triple -> push_back(G, "guerreras");
-            triple -> push_back(R, "recolectoras");
+            triple -> push_back(O, t, "obreras");
+            triple -> push_back(G, t, "guerreras");
+            triple -> push_back(R, t, "recolectoras");
 
             OG -> push_back(O,G);
             OR -> push_back(O,R);

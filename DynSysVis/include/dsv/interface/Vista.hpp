@@ -1,16 +1,33 @@
-#include "Objeto.hpp" 
-#include "Panel.hpp" 
+/*  * autor: Angel Manuel Gonzalez Lopez 
+    * github: https://github.com/angelmanuelgl
+    * web: https://angelmanuelgl.github.io/
+    * 
+    * - - - - - - -  -  DynSysVis  - - - - - - - - - - 
+    * Dynamical System Visualizer Real-Time
+    * libreria de herramientas graficas para monitoreo de datos 
+    * y comportamiento de sistemas complejos en tiempo Real.
+*/
+/*  Vista.hpp
+    Contiene la union del objeto generico que peude ser grafica o cualquier cosa 
+    que herede de objeto
+*/
 
+#ifndef VISTA_HPP
+#define VISTA_HPP
+
+#include "dsv/core/Objeto.hpp"
+#include "dsv/core/Panel.hpp"
 
 namespace dsv {
+
 
 // UNION DE GRAFICA Y OBJETO APRA EL USUARIO
 template <typename T>
 struct Vista {
-    T& objeto;      // El objeto geneiroc como grafica tiempo, fase, circular
-    Panel& panel;   // El contenedor
+    T& objeto;      // el objeto generico como grafica tiempo, fase, circular
+    Panel& panel;   // el contenedor
 
-    // 1. Acceso directo a la gráfica
+    //  Acceso directo a metodos de la grafica(porejemplo) 
     T* operator->() { return &objeto; }
 
     // setPosicion UNFICIADA
@@ -47,3 +64,4 @@ struct Vista {
 
 
 } // termina dsv
+#endif // termina VISTA_HPP

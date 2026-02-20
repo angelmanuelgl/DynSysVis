@@ -14,6 +14,9 @@
     ventajas: mayor personalziacion
     desventajas: tienes punteros (no afecta en nada pero visualmente estresa), mas linea de codigo
         te encatgas de los draw y de crear panel y contenido
+
+    ESTE EJEMPLO LO DEJO AQUI POR SI ALGUIEN NO QUEIRE USAR EL SISTEMA DE LAYOT QUE DISEÑE
+    el resto de cosas si esta actualizado
 */
 
 #include <SFML/Graphics.hpp>
@@ -37,6 +40,7 @@ int main( ){
     // --- Parametros del Pendulo ---
     float theta = 1.5f;      // angulo inicial (aprox 85 grados)
     float omega = 0.0f;      // velocidad angular inicial
+    float t = 0.0f; 
     const float g = 9.81f;   // gravedad
     const float L = 200.0f;  // longitud del pendulo (en pixeles para visualizacion)
     const float amortiguamiento = 0.999f; // opcional: para que se detenga poco a poco
@@ -54,7 +58,7 @@ int main( ){
     // --- graficas y contenido en general ---
     auto* ptrTheta = panelTheta.crearContenido<GraficaTiempo>(Color::c("rojo"));
     auto* ptrOmega = panelOmega.crearContenido<GraficaTiempo>(Color::c("naranja"));
-    auto* ptrFase  = panelFase.crearContenido<GraficaEspacioFase>(Color::c("violeta"));
+    auto* ptrFase  = panelFase.crearContenido<EspacioFase2D>(Color::c("violeta"));
 
 
     // --- acceder a metodos de los objetos -- DSV ( GraficaTiempo,GraficaEspacioFase , etc )
@@ -82,10 +86,11 @@ int main( ){
             omega += aceleracion * dt;
             omega *= amortiguamiento; // Descomentar para friccion
             theta += omega * dt;
+            t+= dt;
 
             // --- actualizar graficas ---
-            ptrOmega->push_back(omega);
-            ptrTheta->push_back(theta);
+            ptrOmega->push_back(omega,t);
+            ptrTheta->push_back(theta,t);
             ptrFase->push_back(omega, theta);
 
             accumulator -= ups;

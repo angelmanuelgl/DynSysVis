@@ -20,16 +20,17 @@
 #ifndef PANEL_HPP
 #define PANEL_HPP
 
-
-#include "Geometria.hpp" // para que dibuje
-#include "Objeto.hpp" // para que conozca el Objeto generico // no es necesarioq ue conozca todos los objetos
-#include "Titulo.hpp" 
-#include "Logger.hpp"
-
+// sfml y std
 #include <SFML/Graphics.hpp>
 #include <memory>        // Para unique_ptr
 #include <iostream>     // Para manejo de errores
 
+// dsv
+#include "dsv/core/Objeto.hpp"
+#include "dsv/core/Logger.hpp"
+#include "dsv/core/Titulo.hpp"
+
+#include "dsv/graphics2D/Geometria.hpp"
 
 namespace dsv{
 
@@ -106,6 +107,7 @@ public:
     // -- titulo --- 
     void cargarFuenteSiFalta();
     void ponerTitulo(const std::string& texto, const sf::Font& fuente);
+    void setTitulo(const std::string& texto){ titulo-> setString(texto); }
     void setSizeTitulo( unsigned int s ){ titulo-> setSize(s); }
 
     // --- como interactua con el contenido --- 

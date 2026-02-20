@@ -53,7 +53,7 @@ public:
         float alturaReal = ascent * 1.0f; 
 
         // centrado
-        float posY = std::round((alturaReservada - alturaReal) / 2.0f);
+        float posY = (alturaReservada - alturaReal) / 2.0f;
         
 
         elTitulo.setPosition(15.f, posY); 

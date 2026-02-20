@@ -8,24 +8,27 @@
     * y comportamiento de sistemas complejos en tiempo Real.
 */
 /*  Temas.hpp
-    sirvira para gestionar colores generales, 
-    poder elegir en assets/config/colores.txt una paleta separado del ejecutable 
-
-    nota: algunos colores fueorn tomados de https://pub.norden.org/designmanual-en/colours.html
+    -> sirvira para gestionar colores generales, 
+    -> poder elegir en assets/config/colores.txt una paleta separado del ejecutable 
+    -> agregar nombres de colroes de acceso rapido dsv::Color::terracota
+    -> funciones que devulven un degradado dado la posicon i y el largo totoal (int i, int n)
+    -> //todo interpolar entre dos colores facilemnte 
 */
 #ifndef TEMAS_HPP
 #define TEMAS_HPP
 
-#include "Logger.hpp"
 
+// std y sfl
 #include <SFML/Graphics.hpp>
 #include <cmath>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
 
-// nota no usa enum class porque aqui guardamos info
-// Temas.hpp
+// dsv
+#include "dsv/core/Logger.hpp"
+
+
 
 namespace dsv {
 
@@ -90,6 +93,8 @@ namespace Color{
             255                   // El azul siempre a tope
         );
     }
+
+    
 
     // Fuego e Hielo: De Rojo ->  Azul 
     inline sf::Color FuegoHielo(int i, int n) {

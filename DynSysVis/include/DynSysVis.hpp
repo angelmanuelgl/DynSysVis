@@ -18,17 +18,33 @@
 #define DYNSYSVIS_HPP
 
 
-#include "Geometria.hpp"
+// --- estructuras de Datos Base ---
+#include "dsv/dataStructures/Estructuras.hpp"
 
-#include "Tablero.hpp"
-#include "Panel.hpp" // Objeto Geoemtria / Titulo
+// --- el nucleo de paneles ---
+#include "dsv/core/Objeto.hpp"
+#include "dsv/core/Logger.hpp"
+#include "dsv/core/Panel.hpp"
+#include "dsv/core/Titulo.hpp"
 
-#include "logger.hpp"
+// --- interfaz y layour ---
+#include "dsv/interface/Tablero.hpp"
+#include "dsv/interface/Vista.hpp"
 
-#include "Graficas.hpp"
-#include "Temas.hpp"
-#include "GraficoCircular.hpp"
-#include "Titulo.hpp"
+// --- graficos en 2D ---
+#include "dsv/graphics2D/Geometria.hpp"
+#include "dsv/graphics2D/Graficas.hpp"
+#include "dsv/graphics2D/GraficoCircular.hpp"
 
+// --- graficos en 3D  ---
+#include "dsv/graphics3D/Grafica3D.hpp"
+// #include "dsv/graphics3D/GraficaND.hpp"
+
+// --- Simulacion Matematicas ---
+#include "dsv/simulation/Modelos.hpp"
+#include "dsv/simulation/Integradores.hpp"
+
+// --- Estilo ---
+#include "dsv/style/Temas.hpp"
 
 #endif

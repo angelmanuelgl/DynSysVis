@@ -13,7 +13,7 @@
     
 */
 
-#include "GraficoCircular.hpp"
+#include "dsv/graphics2D/GraficoCircular.hpp"
 
 namespace dsv{
 /*  

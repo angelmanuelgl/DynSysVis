@@ -6,8 +6,15 @@
 #include <random> // generar puntos aleatoriamente
 using namespace dsv;
 
+
+// se traba feo en  2250
+
+
+// agregar optimizacion CALCULAR LIMITES dio +4 fps 
+// se alenta feo en 4500 - 5000
+
 struct Colonia {
-    float O, G, R;
+    float O, G, R, t;
     std::string id;
     sf::Color color;
 
@@ -23,6 +30,7 @@ struct Colonia {
         O += dO * dt;
         G += dG_dt * dt;
         R += dR_dt * dt;
+        t += dt;
     }
 };
 
@@ -33,27 +41,31 @@ int main( ){
 
     // Layout según tu especificación
     dsv::Layout miLayout = {
-        "f1 f2 f3",
-        "f1 f2 f3",
-        "f1 f2 f3",
-        "f1 f2 f3",
-        "g1 g2 g3 g4",
         "g5 g6 g7 g8 ",
+        "f1 f2 f3 ",
+        "f1 f2 f3 ",
+        "f1 f2 f3 ",
+        "f1 f2 f3 ",
+        "g1 g2 g3 g4 ",
     };
     dsv::Tablero tablero(window, miLayout);
 
     // 1. Paneles de Fase (Contendrán las 20 simulaciones cada uno)
-    auto faseOG = tablero.add<dsv::GraficaEspacioFase>("Espacio Fase (O, G)", dsv::Color::azul, "f1");
-    auto faseOR = tablero.add<dsv::GraficaEspacioFase>("Espacio Fase (O, R)", dsv::Color::azul, "f2");
-    auto faseRG = tablero.add<dsv::GraficaEspacioFase>("Espacio Fase (R, G)", dsv::Color::azul, "f3");
+    auto faseOG = tablero.add<dsv::EspacioFase2D>("Espacio Fase (O, G)", dsv::Color::azul, "f1");
+    auto faseOR = tablero.add<dsv::EspacioFase2D>("Espacio Fase (O, R)", dsv::Color::azul, "f2");
+    auto faseRG = tablero.add<dsv::EspacioFase2D>("Espacio Fase (R, G)", dsv::Color::azul, "f3");
 
     faseOG -> configurarLimites( 0, 400, 0 , 200, true);
     faseOR -> configurarLimites( 0, 400, 0 , 200, true);
     faseRG -> configurarLimites( 0, 100, 0 , 200, true);
 
-    faseOG->configurarMaxPoints(2000);
-    faseOR->configurarMaxPoints(2000);
-    faseRG->configurarMaxPoints(2000);
+
+    for( auto it : {faseOG, faseOR,faseRG }){
+        it-> configurarMaxPoints(500);
+        it-> ponerCabeza(false);
+        it-> activarSeguimiento(true);
+    }
+
 
     // Paneles Temporales 
     const int MAXP = 8;
@@ -63,13 +75,14 @@ int main( ){
         g->agregarSerie("Obreras",  sf::Color(50,200,50));
         g->agregarSerie("Guerreras", sf::Color(200,50,50));
         g->agregarSerie("Recolectoras",  sf::Color(150,150,50));
-        g->configurarMaxPoints(3000);
+        // g->configurarMaxPoints(1000);
+        // g->configurarMaxLim(100);
         g.panel.setSizeTitulo(10);
         panelesT.push_back(g);
     }
 
     // --- Inicializar 20 Simulaciones ---
-    const int numTotal = 40;
+    const int numTotal = 70;
     std::vector<Colonia> colonias;
     
     // rangos aleatorios
@@ -88,7 +101,7 @@ int main( ){
         std::string id = "C" + std::to_string(i);
         sf::Color col = dsv::Color::Cyberpunk(i, numTotal);
 
-        colonias.push_back({initO, initG, initR, id, col});
+        colonias.push_back({initO, initG, initR, 0, id, col});
 
         // agregar series con colores
         faseOG->agregarSerie(id, col);
@@ -101,6 +114,9 @@ int main( ){
     sf::Time accumulator = sf::Time::Zero;
     sf::Time ups = sf::seconds(0.01f);
     bool ini = false;
+    
+    sf::Clock fpsClock;
+    int frameCount = 0;
     while(window.isOpen() ){
         sf::Event event;
         while(window.pollEvent(event) ){
@@ -113,29 +129,44 @@ int main( ){
         }
 
         accumulator += clock.restart();
-        while(accumulator >= ups && ini ){
+        while( accumulator >= ups && ini ){
             float dt = ups.asSeconds();
 
             for(int i = 0; i < numTotal; ++i ){
                 colonias[i].actualizar(dt);
-
-                // Todas las 20 van a los diagramas de fase
-                faseOG->push_back(colonias[i].O, colonias[i].G, colonias[i].id);
-                faseOR->push_back(colonias[i].O, colonias[i].R, colonias[i].id);
-                faseRG->push_back(colonias[i].R, colonias[i].G, colonias[i].id);
-
-                // Solo las primeras 6 van a los paneles individuales
-                if( i < MAXP ){
-                    panelesT[i]->push_back(colonias[i].O, "Obreras");
-                    panelesT[i]->push_back(colonias[i].G, "Guerreras");
-                    panelesT[i]->push_back(colonias[i].R, "Recolectoras");
-                }
             }
+
             accumulator -= ups;
         }
 
+        // a ver si actulizar afuera mejora rendimiento
+        for( int i = 0; i < numTotal && ini; ++i ){
+            // Todas las 20 van a los diagramas de fase
+            faseOG->push_back(colonias[i].O, colonias[i].G,  colonias[i].id);
+            faseOR->push_back(colonias[i].O, colonias[i].R,  colonias[i].id);
+            faseRG->push_back(colonias[i].R, colonias[i].G,  colonias[i].id);
+
+            // Solo las primeras 6 van a los paneles individuales
+            if( i < MAXP ){
+                panelesT[i]->push_back(colonias[i].O, colonias[i].t, "Obreras");
+                panelesT[i]->push_back(colonias[i].G, colonias[i].t, "Guerreras");
+                panelesT[i]->push_back(colonias[i].R, colonias[i].t, "Recolectoras");
+            }
+        }
+        
+
+
+
+        // --- Contador de FPS ---
+        frameCount++;
+        if (fpsClock.getElapsedTime().asSeconds() >= 1.0f) {
+            float fps = static_cast<float>(frameCount) / fpsClock.restart().asSeconds();
+            faseOG.panel.setTitulo(  "fps =  " + std::to_string(static_cast<int>(fps)));
+            frameCount = 0;
+        }
         tablero.draw();
         window.display();
+        
     }
     return 0;
 }

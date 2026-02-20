@@ -80,29 +80,6 @@ F* nanzas Cuantitativas: Modelado de caminatas aleatorias o movimiento browniano
 
 ## 🚀 Instrucciones de Compilación
 
-### PASO A PASO
-Para no recompilar la librería entera cada vez que hagas un cambio en tus simulaciones, primero genera los archivos objeto:
-
-```bash
-g++ -c lib_grafica/src/Geometria.cpp -I lib_grafica/include -o build/Geometria.o
-g++ -c lib_grafica/src/Graficas.cpp -I lib_grafica/include -o build/Graficas.o
-g++ -c lib_grafica/src/Panel.cpp -I lib_grafica/include -o build/Panel.o
-```
-luego compilar cada proyecto proyecto
-
-**Sistema de ecuacines diferenciales para poblaciones (HORMIGAS)**
-```bash
-g++ apps/hormigas/main.cpp build/Geometria.o build/Graficas.o -I lib_grafica/include -o build/hormigas.exe -lsfml-graphics -lsfml-window -lsfml-system
-```
-**Ecuacion diferencial de segundo Orden (PENDULO)**
-```bash
-g++ apps/pendulo/pendulo.cpp build/Geometria.o build/Graficas.o build/Panel.o -I lib_grafica/include -o build/pendulo.exe -lsfml-graphics -lsfml-window -lsfml-system
-```
-**Proceso Bisexual de Dalton Watson (PULPOS)**
-```bash
-g++ apps/GaltonWatson/simulacionconArbol.cpp build/Geometria.o build/Graficas.o -I lib_grafica/include -o build/pulpos.exe -lsfml-graphics -lsfml-window -lsfml-system
-```
-
 ### Usando MakeFIle
 
 Para faciliatar esto puedes usar makefile, solo asegurate de tener instalado ``pacman -S mingw-w64-ucrt-x86_64-make``
@@ -110,20 +87,16 @@ Para faciliatar esto puedes usar makefile, solo asegurate de tener instalado ``p
 Una vez que ejecutas ``mingw32-make`` dentro de DynSysVis, se genera el archivo lib/libDynSysVis.a
 Para usar el modo log usar ``mingw32-make LOG=1 ``
 
+Yo me encargo de que el makefile siempre funcione apesar de los cambios en carpetas y etc
 
-leugo compialr proyectos con
+luego compilar  proyectos con
 ```
 mingw32-make run APP=apps/pendulo/pendulo.cpp
+mingw32-make run APP=apps/pendulo/penduloFase.cpp
 mingw32-make run APP=apps/hormigas/main.cpp
-mingw32-make run APP=apps/GaltonWatson/simulacionconArbol.cpp
+mingw32-make run APP=apps/hormigas/hormigasFase.cpp
+mingw32-make run APP=apps/pruebasFast/pruebas.cpp
 ```
 
 
 ## algunas visualizaciones externas
-
-Para representar grafos rapdiamente usar
-https://edotor.net/
-
-```
-python .\apps\GaltonWatson\Plots\plot_results.py
-```

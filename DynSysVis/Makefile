@@ -30,8 +30,11 @@ SOURCES = $(wildcard $(SRC_DIR)/*.cpp)
 # lista de archivos .o que iran en build
 OBJECTS = $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SOURCES))
 
-# lista de archivos .hpp
-HEADERS = $(wildcard include/*.hpp)
+# lista de archivos .hpp (solo bsuca en la raiz)
+# HEADERS = $(wildcard include/*.hpp)
+
+# lista de archivos .hpp (busca bien)
+HEADERS = $(wildcard include/*.hpp) $(wildcard include/dsv/*/*.hpp)
 
 # ruta  de libreria final ojo con :=
 LIBRARY := $(LIB_DIR)/$(LIBNAME).a
@@ -84,12 +87,14 @@ cleandist:
 dist: cleandist all
 	@echo --- Preparando distribucion en /$(DIST_DIR) ---
 	@if not exist "$(DIST_DIR)" mkdir "$(DIST_DIR)"
-	@if not exist "$(DIST_DIR)\include" mkdir "$(DIST_DIR)\include"
 	@if not exist "$(DIST_DIR)\lib" mkdir "$(DIST_DIR)\lib"
-	@echo Exportando headers...
-	cmd /c copy "include\*.hpp" "$(DIST_DIR)\include\"
+
 	@echo Exportando libreria estatica...
 	cmd /c copy "lib\$(LIBNAME).a" "$(DIST_DIR)\lib\"
+
+	@echo Exportando todas las subcarpetas de headers con xcopy /S /I /Y /E...
+	xcopy "include" "$(DIST_DIR)\include" /S /I /Y /E
+	
 	@echo --- Libreria $(DIST_DIR) lista para usar ---
 
 

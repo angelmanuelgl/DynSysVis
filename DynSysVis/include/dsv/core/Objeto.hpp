@@ -15,13 +15,16 @@
     virtual void draw(sf::RenderWindow& window, sf::RenderStates states, sf::Vector2f pSize) = 0;
     
     el panel se encargara del resto, llamr tu funcion, colocarlo dentro
+
+    IMPORTANTE QUE SI CREAS TUN PROPIO COSA (grafo, poblacion, grafica, pie, etc) este HEREDE A objeto, 
+    -> porque panel guarda    std::unique_ptr<Objeto> contenido;
 */
 
 #ifndef OBJETO_HPP
 #define OBJETO_HPP
 
 #include <SFML/Graphics.hpp>
-#include <Logger.hpp>
+#include "dsv/core/Logger.hpp"
 
 namespace dsv{
 
@@ -30,7 +33,7 @@ class Objeto {
 public:
     sf::Font font;
 
-    // La fuente es estática: compartida por todas las instancias
+    // La fuente es esatica: compartida por todas las instancias
     static sf::Font fuenteCompartida;
     static bool fuenteCargada;
 

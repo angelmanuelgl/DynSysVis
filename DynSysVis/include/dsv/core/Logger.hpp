@@ -58,4 +58,7 @@ namespace dsv {
     #define DSV_LOG_ERROR(m)   dsv::Logger::Log(dsv::Logger::Level::CRITIC,  m, __FILE__, __LINE__)
 #endif
 
-#endif
+
+
+
+#endif //termina DSV_LOGGER_HPP

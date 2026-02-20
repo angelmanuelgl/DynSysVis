@@ -17,16 +17,17 @@
 #ifndef GRAFICOCIRCULAR_HPP
 #define GRAFICOCIRCULAR_HPP
 
-
-// #include "Panel.hpp" // para que reconozca la clase panel 
-#include "Objeto.hpp" // para que conozca el Objeto generico
-// #include "Geometria.hpp" // arcos y utilidades geoemtricas
-
+// std y sfml
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <string>
 #include <algorithm>
 #include <cmath>
+
+
+// dsv 
+#include "dsv/core/Objeto.hpp" // para que conozca el Objeto generico
+
 
 namespace dsv{
 

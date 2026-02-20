@@ -18,8 +18,7 @@
     -> posciion
 */
 
-
-#include "panel.hpp"
+#include "dsv/core/Panel.hpp"
 
 namespace dsv{
 /*

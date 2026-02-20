@@ -18,15 +18,19 @@
 #define GRAFICAS_HPP
 
 
-// #include "Panel.hpp" // para que reconozca la clase panel 
-#include "Objeto.hpp" // para que conozca el Objeto generico
-
+// std y SFML
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <string>
 #include <algorithm>
 #include <map>          // para las series
 #include <functional>   //  mapearPunto
+
+// dsv
+#include "dsv/core/Objeto.hpp" // para que conozca el Objeto generico
+#include "dsv/core/Logger.hpp"
+
+#include "dsv/dataStructures/Estructuras.hpp" // MonotonicMaxQueue
 
 
 namespace dsv{
@@ -35,17 +39,14 @@ namespace dsv{
     --- --- --- AUXILIARES  --- --- --- 
     --- --- --- --- --- --- --- --- --- 
 */
-struct Limites {
-    float minX, maxX, minY, maxY;
-};
+
 
 class Serie {
 private:
     // info de esta serie
     std::string nombre;
     sf::Color color;
-    std::vector<sf::Vector2f> puntos;
-
+    MonotonicQueue2D<float> puntos;
     // info que sera compartida
     unsigned int maxPoints;
     
@@ -68,18 +69,27 @@ public:
     // dibujar
     void draw(sf::RenderWindow& window, sf::RenderStates states, 
                 std::function<sf::Vector2f(sf::Vector2f)> mapearPunto,
-                bool sombreado=false, bool desvanece=false, float valorReferenciaY=0);
+                bool sombreado=false, bool desvanece=false, bool cabeza = false,
+                float valorReferenciaY=0);
+    void aportarCabeza(sf::VertexArray& arrayGlobal, std::function<sf::Vector2f(sf::Vector2f)> mapearPunto);
     
+    // ila seire interactua dcon los datos
+
+
+
     // SETs
     void setColor(sf::Color col){ color = col; }
     void setMaxPoints(int mp){ maxPoints = mp; }
-
+    
     // GETs
-    const std::vector<sf::Vector2f>& getPuntos() const { return puntos; }
     sf::Color getColor() const { return color; }
     std::string getNombre() const { return nombre; }
     bool vacia() const { return puntos.empty(); }
     Limites getLimites() const { return misLimites; }
+    // serie
+    sf::Vector2f back(){ return puntos.back(); }
+    sf::Vector2f front(){ return puntos.front(); }
+    void pop( ){ puntos.pop(); }
 };
 
 
@@ -102,9 +112,8 @@ protected:
     // datos de todas las lineas
     unsigned int maxPoints;
     sf::Color lineaResaltado;
-    bool sombreado; 
-    bool sombreadoAlEje;
-    bool desvanece;
+    bool sombreado, sombreadoAlEje;
+    bool desvanece, cabeza;
 
     Limites lim;
     bool autoEscalado = true;
@@ -123,7 +132,7 @@ public:
     GraficaBase(unsigned int maxPts, sf::Color color);
 
 
-    virtual ~GraficaBase() {}
+    virtual ~GraficaBase(){}
 
     // neceistan implementar las subclases
     virtual void recalcularExtremos(void) = 0;
@@ -148,7 +157,8 @@ public:
     }
 
     void ponerSombreado( bool s, bool eje = true ){ sombreado = s; sombreadoAlEje = eje;}
-    void ponerDesvanecido( bool s ){ desvanece = s;}
+    void ponerDesvanecido( bool s, bool c ){ desvanece = s, cabeza =c;}
+    void ponerCabeza( bool c ){ cabeza =c;}
     
     // dibujar
     void dibujarContenido(sf::RenderWindow& window, sf::RenderStates states, float paddingL, float offsetTop, float graphWidth, float graphHeight);
@@ -165,23 +175,28 @@ public:
 class GraficaTiempo : public GraficaBase {
 private:
     float contadorSegundos;
+    float maxLimX; // cantiddad de ancho fija
     
 public:
     GraficaTiempo(sf::Color color = sf::Color::Blue);
     // --- datos ---
     void recalcularExtremos(void) override;
     void push_back(float val, std::string clave ="");
+    void push_back(float val , float t, std::string clave ="");
+    
+    void configurarMaxLim(float maxlx){ maxLimX = maxlx; };
 };
 
-class GraficaEspacioFase : public GraficaBase {
+class EspacioFase2D : public GraficaBase {
 private:
-    //
+    bool seguimiento = false;
 
 public:
-    GraficaEspacioFase(sf::Color color = sf::Color::Blue );
+    EspacioFase2D(sf::Color color = sf::Color::Blue );
     // --- datos ---
     void recalcularExtremos(void) override;
     void push_back(float x, float y, std::string clave ="");
+    void activarSeguimiento(bool s){ seguimiento = s; autoEscalado = true;}
 };
 
 
