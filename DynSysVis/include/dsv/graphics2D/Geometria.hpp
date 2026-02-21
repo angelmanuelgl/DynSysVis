@@ -47,7 +47,8 @@ namespace dsv{
 
     // funciones globales
     sf::VertexArray generarRectanguloRelleno(sf::Vector2f size, float radio, uint32_t calidad, sf::Color color);
-
+    sf::VertexArray generarRectanguloRellenoDegradado(sf::Vector2f size, float radio, uint32_t calidad, 
+                                            sf::Color colorTop, sf::Color colorBot);
     void generarBorde(sf::VertexArray& vertex_array, sf::Vector2f position, sf::Vector2f size, 
                     float radio, float grosor, uint32_t calidad, sf::Color color);
 
@@ -59,7 +60,7 @@ namespace dsv{
         sf::VertexArray contorno;
     public:
         void generar(sf::Vector2f size, float radio, sf::Color bgColor, sf::Color extColor);
-        
+        void generar(sf::Vector2f size, float radio, sf::Color colorTop, sf::Color colorBot, sf::Color extColor);
 
         void draw( sf::RenderWindow& window, const sf::Transform& transform);
         void drawBack( sf::RenderWindow& window, const sf::Transform& transform);

@@ -14,21 +14,32 @@ int main() {
     dsv::Sistema::inicializarVentana(window, "DynSysVis RT - 20 Simulaciones SIR");
 
     dsv::Layout miLayout = {
-        "f1 f1 f2 f2",
-        "f1 f1 f2 f2",
+        "3d 3d 3d f1",
+        "3d 3d 3d f2",
+        "3d 3d 3d f3",
         "t1 t1 t1 t1"
     };
-    dsv::Tablero tablero(window, miLayout,  sf::Color(60, 60, 60),  sf::Color(40, 40, 40));
+    dsv::Tablero tablero(window, miLayout,  sf::Color(40,40,50),  sf::Color(20,20,25));
 
     // Paneles
-    auto fase = tablero.add<dsv::EspacioFase2D>("Fase: Susceptibles vs Infectados", dsv::Color::azul, "f1");
-    auto fase3D = tablero.add<dsv::Grafica3D>("Trayectorias SIR (S,I,R)", dsv::Color::cian, "f2");
-    auto tiempo = tablero.add<dsv::GraficaTiempo>("Evolución Infectados (20 Tiradas)", dsv::Color::naranja, "t1");
+    auto faseSI = tablero.add<dsv::EspacioFase2D>("Fase: Susceptibles vs Infectados", dsv::Color::azul, "f1");
+    auto faseIR = tablero.add<dsv::EspacioFase2D>("Fase: Infectados vs Recuperados", dsv::Color::azul, "f2");
+    auto faseRS = tablero.add<dsv::EspacioFase2D>("Fase: Recuperados vs Susceptibles", dsv::Color::azul, "f3");
+    auto fase3D = tablero.add<dsv::Grafica3D>("Trayectorias SIR (S,I,R)", dsv::Color::cian, "3d");
+    auto tiempo = tablero.add<dsv::GraficaTiempo>("Evolucion Infectados (mutiples Tiradas)", dsv::Color::naranja, "t1");
 
     // Configuración visual
-    fase->configurarLimites(0, 100, 0, 100, true);
+    // fase->configurarLimites(0, 100, 0, 100, true);
     tiempo->configurarLimites(0, 50, 0, 100, true);
     tiempo->ponerSombreado(false);
+    
+    for( auto fase : {faseIR,faseSI,faseRS }){
+          fase.panel.setDegradado( sf::Color(40,40,50), sf::Color(20,20,25) );
+    }
+  
+    fase3D.panel.setDegradado( sf::Color(40,40,50), sf::Color(20,20,25) );
+    tiempo.panel.setDegradado( sf::Color(40,40,50), sf::Color(20,20,25) );
+
     
     // Inicializar 20 instancias
     const int numSims = 20;
@@ -40,7 +51,9 @@ int main() {
         sf::Color col = dsv::Color::Oceano(i, numSims);
         sims[i].state = {200.0f, 10.0f, 0.0f}; // S=99, I=1, R=0
         
-        fase->agregarSerie(id, col);
+        for( auto fase : {faseIR,faseSI,faseRS })
+            fase->agregarSerie(id, col);
+
         tiempo->agregarSerie(id, col);
         fase3D->agregarSerie(id, col);
     }
@@ -54,7 +67,11 @@ int main() {
         sf::Event event;
         while(window.pollEvent(event)) {
             if(event.type == sf::Event::Closed) window.close();
-            if(event.type == sf::Event::KeyPressed) iniciado = true;
+            if(event.type == sf::Event::KeyPressed){
+                iniciado = true;
+                accumulator = sf::Time::Zero;
+                clock.restart();
+            } 
             fase3D->gestionarEvento(event, window);
         }
 
@@ -69,16 +86,19 @@ int main() {
                 dsv::sim::step(s, ups.asSeconds());
 
                 // Llenar graficas
-                fase->push_back(s.state[0], s.state[1], id);
+                faseSI->push_back(s.state[0], s.state[1], id);
+                faseIR->push_back(s.state[1], s.state[2], id);
+                faseRS->push_back(s.state[2], s.state[0], id);
+
                 tiempo->push_back(s.state[1], s.t, id);
                 fase3D->push_back(s.state[0], s.state[1], s.state[2], id);
             }
             accumulator -= ups;
         }
-        if( iniciado ){
-            tablero.draw();
-            window.display();
-        }
+        
+        tablero.draw();
+        window.display();
+    
      
     }
     return 0;

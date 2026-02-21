@@ -1,4 +1,4 @@
-# DynSysVis - Dynamical System Visualizer Real-Time
+# DynSysVis RT - Dynamical System Visualizer Real-Time
 
 
 **DynSysVis RT** 
@@ -7,6 +7,10 @@ es una herramienta (en desarrollo) para la visualización de datos en tiempo rea
 Está diseñada para integrarse fácilmente en simulaciones complejas, permitiendo monitorear mediante gráficas temporales y retratos de fase.
 **Ajustando tamaños** y **posiciones** muy facilmente usando un **sistema de panales** implementados por mi
 
+# DynSysVis RT
+
+[![Website](https://img.shields.io/badge/Project-Website-blueviolet?style=for-the-badge&logo=google-chrome&logoColor=white)](https://angelmanuelgl.github.io/proyectos/DynSysVis/)
+[![Source Code](https://img.shields.io/badge/Source-GitHub-lightgrey?style=for-the-badge&logo=github)](https://github.com/angelmanuelgl/DynSysVis)
 
 ## Caracteristicas
 * **Visualización en Tiempo Real**: Gráficas de evolución temporal con sombreado de degradado (gradient fill).
@@ -96,6 +100,9 @@ mingw32-make run APP=apps/pendulo/penduloFase.cpp
 mingw32-make run APP=apps/hormigas/main.cpp
 mingw32-make run APP=apps/hormigas/hormigasFase.cpp
 mingw32-make run APP=apps/pruebasFast/pruebas.cpp
+
+mingw32-make run APP=apps/mix/lor.cpp
+mingw32-make run APP=apps/mix/sir.cpp
 ```
 
 

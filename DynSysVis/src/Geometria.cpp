@@ -52,6 +52,38 @@ sf::VertexArray generarRectanguloRelleno(sf::Vector2f size, float radio, uint32_
     fan.append(fan[1]);
     return fan;
 }
+sf::VertexArray generarRectanguloRellenoDegradado(sf::Vector2f size, float radio, uint32_t calidad, 
+                                                sf::Color colorTop, sf::Color colorBot) {
+    generadorRectangulo gen(size, radio, calidad);
+    uint32_t numPuntos = 4 * calidad;
+    
+    // Usamos TriangleFan: el primer punto es el centro del panel
+    sf::VertexArray va(sf::TriangleFan, numPuntos + 2);
+    
+    // Punto central (Color promedio)
+    sf::Color centroCol(
+        (colorTop.r + colorBot.r) / 2,
+        (colorTop.g + colorBot.g) / 2,
+        (colorTop.b + colorBot.b) / 2,
+        (colorTop.a + colorBot.a) / 2
+    );
+    va[0].position = {size.x / 2.0f, size.y / 2.0f};
+    va[0].color = centroCol;
+
+    for (uint32_t i = 0; i <= numPuntos; ++i) {
+        sf::Vector2f p = gen.getPunto(i % numPuntos);
+        va[i + 1].position = p;
+        
+        // INTERPOLACIÓN LINEAL según la altura (y)
+        float t = p.y / size.y; 
+        va[i + 1].color.r = static_cast<sf::Uint8>(colorTop.r * (1 - t) + colorBot.r * t);
+        va[i + 1].color.g = static_cast<sf::Uint8>(colorTop.g * (1 - t) + colorBot.g * t);
+        va[i + 1].color.b = static_cast<sf::Uint8>(colorTop.b * (1 - t) + colorBot.b * t);
+        va[i + 1].color.a = static_cast<sf::Uint8>(colorTop.a * (1 - t) + colorBot.a * t);
+    }
+
+    return va;
+}
 
 void generarBorde(sf::VertexArray& vertex_array, sf::Vector2f position, sf::Vector2f size, 
                   float radio, float grosor, uint32_t calidad, sf::Color color) {
@@ -85,6 +117,10 @@ void generarBorde(sf::VertexArray& vertex_array, sf::Vector2f position, sf::Vect
 
 void RectanguloRedondeado::generar(sf::Vector2f size, float radio, sf::Color bgColor, sf::Color extColor){
     background = generarRectanguloRelleno(size, radio, 40, bgColor);
+    generarBorde(contorno, {0.f, 0.f}, size, radio, 2.0f, 40, extColor);
+}
+void RectanguloRedondeado::generar(sf::Vector2f size, float radio, sf::Color colorTop, sf::Color colorBot, sf::Color extColor){
+    background = generarRectanguloRellenoDegradado(size, radio, 40, colorTop, colorBot);
     generarBorde(contorno, {0.f, 0.f}, size, radio, 2.0f, 40, extColor);
 }
 

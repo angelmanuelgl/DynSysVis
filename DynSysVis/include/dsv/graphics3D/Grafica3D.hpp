@@ -36,11 +36,11 @@ public:
 
         // agregar ejes // todo mas control, ahcelo opcional, gestioanr limites
         push_backC(0,0,0, "X", sf::Color::Red);
-        push_backC(50,0,0, "X", sf::Color::Red);
+        push_backC(120,0,0, "X", sf::Color::Red);
         push_backC(0,0,0, "Y", sf::Color::Blue);
-        push_backC(0,50,0, "Y", sf::Color::Blue);
+        push_backC(0,120,0, "Y", sf::Color::Blue);
         push_backC(0,0,0, "Z", sf::Color::Green);
-        push_backC(0,0,50, "Z", sf::Color::Green);
+        push_backC(0,0,120, "Z", sf::Color::Green);
     }
 
     void agregarSerie(std::string nombre, sf::Color color){

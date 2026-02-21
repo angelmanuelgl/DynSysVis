@@ -23,15 +23,20 @@ int main() {
         "3d 3d  f3 ",
         "3d 3d  f4   ",
     };
-    dsv::Tablero tablero(window, miLayout,  sf::Color(60, 60, 60),  sf::Color(40, 40, 40));
+    dsv::Tablero tablero(window, miLayout,  sf::Color(40,40,50),  sf::Color(20,20,25));
 
     // Paneles
-    auto faseXY = tablero.add<dsv::EspacioFase2D>("Fase: XY", dsv::Color::azul, "f2");
-    auto faseYZ = tablero.add<dsv::EspacioFase2D>("Fase: YZ", dsv::Color::azul, "f3");
-    auto faseXZ = tablero.add<dsv::EspacioFase2D>("Fase: XZ", dsv::Color::azul, "f4");
+    auto faseXY = tablero.add<dsv::EspacioFase2D>("Fase: XY", dsv::Color::blanco, "f2");
+    auto faseYZ = tablero.add<dsv::EspacioFase2D>("Fase: YZ", dsv::Color::blanco, "f3");
+    auto faseXZ = tablero.add<dsv::EspacioFase2D>("Fase: XZ", dsv::Color::blanco, "f4");
 
-    auto fase3D = tablero.add<dsv::Grafica3D>("Trayectorias Modelo Lorentz", dsv::Color::cian, "3d");
-    auto tiempo = tablero.add<dsv::GraficaTiempo>("Evolución Infectados (20 Tiradas)", dsv::Color::naranja, "t1");
+    auto fase3D = tablero.add<dsv::Grafica3D>("Trayectorias Modelo Lorentz", dsv::Color::blanco, "3d");
+    auto tiempo = tablero.add<dsv::GraficaTiempo>("Evolución Infectados (20 Tiradas)", dsv::Color::blanco, "t1");
+
+    faseXY.panel.setDegradado( sf::Color(40,40,50), sf::Color(20,20,25) );
+    faseYZ.panel.setDegradado( sf::Color(40,40,50), sf::Color(20,20,25) );
+    faseXZ.panel.setDegradado( sf::Color(40,40,50), sf::Color(20,20,25) );
+    fase3D.panel.setDegradado( sf::Color(40,40,50), sf::Color(20,20,25) );
 
     // Configuración visual
     tiempo->configurarLimites(0, 50, 0, 100, true);

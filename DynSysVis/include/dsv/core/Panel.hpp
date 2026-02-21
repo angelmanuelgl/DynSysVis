@@ -68,6 +68,7 @@ private:
     sf::Vector2f size;
     sf::Color extColor;
     sf::Color bgColor;
+    sf::Color bgBotColor;
 
     // para titulo
     bool yafuenteCargada;
@@ -77,12 +78,10 @@ private:
 public:
     Panel(sf::RenderWindow& window_, 
                 const std::string& tituloPanel ="", 
-                sf::Color extColor = sf::Color::White,
-                double nx = 3, double ny = 4, // para tamano
-                sf::Color bgColor=sf::Color(30,30,30) ); // color de fondo
+                sf::Color extColor = sf::Color::White); // color de fondo
 
     void configurarMedidas( float r, float esp, float margen);
-       
+    void setDegradado(sf::Color colorTop, sf::Color colorBot);
  
     // posicionamiento 
     void setSize(double nx, double ny);

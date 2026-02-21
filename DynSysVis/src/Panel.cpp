@@ -25,22 +25,36 @@ namespace dsv{
     STRUCT PANEL
     generar paneles dinamicos
 */
-Panel::Panel(sf::RenderWindow& window_,  const std::string& tituloPanel, sf::Color extColor,  
-        double nx, double ny , sf::Color bgColor):
-    window(window_), extColor(extColor), bgColor(bgColor) {   
+Panel::Panel(sf::RenderWindow& window_,  const std::string& tituloPanel, sf::Color extColor):
+    window(window_), extColor(extColor) {   
     
-    setSize(nx,ny);
+    // asignar color en automatcio
+    bgColor=sf::Color(30,30,30);
+    
 
     // poner fuente por defecto 
     yafuenteCargada = false;
-    if( tituloPanel != "") {
+    if( tituloPanel != "" ){
         cargarFuenteSiFalta();
         ponerTitulo(tituloPanel, fuentePredeterminada);
     }
-   
-
-    elMarco.generar(size, radio, bgColor, extColor);
     
+    
+    //  se espera que el panel se use llamando el tablero asi que esto es de emergencia
+    setSize(2,2);
+    elMarco.generar(size, radio, bgColor, extColor);
+
+    // tecnicamente con llamar al consturctor no basta hay que llamar a 
+    //  sizeEnRejilla  y positionEnRejilla para que funcione
+    // esto ya lo hace el layout asi que no deberia haber problema
+    
+}
+void Panel::setDegradado(sf::Color colorTop, sf::Color colorBot) {
+    this->bgColor = colorTop;     // Guardamos el principal por si acaso
+    this->bgBotColor = colorBot;  // Necesitarás este nuevo miembro en el .hpp
+    
+    // El color de borde (extColor) se mantiene igual
+    elMarco.generar(size, radio, colorTop, colorBot, extColor);
 }
 
 void Panel::setSize(double nx, double ny){
