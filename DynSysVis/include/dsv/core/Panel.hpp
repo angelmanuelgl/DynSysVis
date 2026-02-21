@@ -22,6 +22,7 @@
 
 // sfml y std
 #include <SFML/Graphics.hpp>
+#include <SFML/OpenGL.hpp> //para sissor
 #include <memory>        // Para unique_ptr
 #include <iostream>     // Para manejo de errores
 
@@ -97,6 +98,7 @@ public:
     void positionEnRejilla(int fila, int col, int totalFilas, int totalCols);
 
     // dibujar
+    void aplicarRecorte(const sf::RenderWindow& window, sf::Vector2f pos, sf::Vector2f tam);
     void draw(void);
     
     // GETs

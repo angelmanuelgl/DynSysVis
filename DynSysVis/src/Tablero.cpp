@@ -125,7 +125,7 @@ namespace dsv {
         setFondoDegradado(colorFondo1, colorFondo2);
     }
 
-    /*  ---  GESTIOANR EL LAYOUR --- */
+    /*  ---  GESTIOANR EL LAYOUT --- */
 
     void Tablero::setLayout(const Layout& l ){
         layoutActual = std::make_unique<Layout>(l);
@@ -143,6 +143,7 @@ namespace dsv {
 
         if( !layoutActual->regiones.count(id) ){
             DSV_LOG_WARN("El ID '" + id + "' no existe en el Layout. El panel no se posicionara.");
+            return;
         }
 
         int totalFilas = (float)layoutActual->totalFilas;

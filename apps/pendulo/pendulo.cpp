@@ -33,7 +33,7 @@ int main( ){
     // --- tablero con datos --- DSV
     dsv::Layout miLayout = {
         "f  .",
-        "f  o",
+        "f  .",
         "t t",
     };
     dsv::Tablero tablero(window, miLayout);

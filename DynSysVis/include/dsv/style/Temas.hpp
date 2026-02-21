@@ -106,8 +106,52 @@ namespace Color{
         );
     }
     
-
-
+    // morado oscuro -> Verde -> Amarillo brillante. 
+    inline sf::Color Viridis(int i, int n) {
+        float r = static_cast<float>(i) / (n - 1);
+        // Aproximación de los nodos de Viridis
+        return sf::Color(
+            static_cast<sf::Uint8>(253 * r * r + 68 * (1-r)), // R
+            static_cast<sf::Uint8>(231 * r + 12 * (1-r)),     // G
+            static_cast<sf::Uint8>(37 + 150 * r * (1-r))      // B
+        );
+    }
+    // Negro/Morado -> Rojo/Naranja -> Blanco/Amarillo
+    inline sf::Color Magma(int i, int n) {
+        float r = static_cast<float>(i) / (n - 1);
+        return sf::Color(
+            static_cast<sf::Uint8>(255 * std::pow(r, 0.4f)), // R sube rápido
+            static_cast<sf::Uint8>(200 * std::pow(r, 1.5f)), // G sube lento
+            static_cast<sf::Uint8>(150 * std::pow(r, 3.0f) + 50 * (1-r)) // B
+        );
+    }
+    // uave a través del Violeta -> Magenta -> Naranja.
+    inline sf::Color Plasma(int i, int n) {
+        float r = static_cast<float>(i) / (n - 1);
+        return sf::Color(
+            static_cast<sf::Uint8>(237 * std::pow(r, 0.7f) + 13 * (1-r)),
+            static_cast<sf::Uint8>(252 * std::pow(r, 2.0f) + 30 * (1-r)),
+            static_cast<sf::Uint8>(255 * std::sin(r * 1.5f) + 100 * (1-r))
+        );
+    }
+    //  Verde oscuro -> Esmeralda -> Lima.
+    inline sf::Color Bosque(int i, int n) {
+        float r = static_cast<float>(i) / (n - 1);
+        return sf::Color(
+            30 + 150 * r,  // Rojo bajo
+            80 + 175 * r,  // Verde dominante
+            50             // Azul fijo
+        );
+    }
+    // Azul marino -> Turquesa -> Blanco espuma.
+    inline sf::Color Oceano(int i, int n){
+        float r = static_cast<float>(i) / (n - 1);
+        return sf::Color(
+            static_cast<sf::Uint8>(255 * std::pow(r, 2.0f)), // Solo al final blanquea
+            static_cast<sf::Uint8>(100 + 155 * r),
+            static_cast<sf::Uint8>(150 + 105 * r)
+        );
+    }
 
     // ---------------------------------------------------
     //  mapa  se guardan todos los colores del txt

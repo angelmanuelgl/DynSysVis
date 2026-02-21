@@ -62,6 +62,8 @@ namespace dsv{
         
 
         void draw( sf::RenderWindow& window, const sf::Transform& transform);
+        void drawBack( sf::RenderWindow& window, const sf::Transform& transform);
+        void drawCont( sf::RenderWindow& window, const sf::Transform& transform);
     };
 
 // termina dsv

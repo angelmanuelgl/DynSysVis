@@ -16,11 +16,13 @@ CXXFLAGS = -I$(LIB_SDK)/include -Wall -std=c++17
 ifeq ($(LOG), 1)
     CXXFLAGS += -DDSV_DEBUG
 endif
+CXXFLAGS += -DDSV_DEBUG
 
 # 2. Linkeo:
 # -L apunta a la carpeta de binarios del SDK
 # -lDynSysVis busca el archivo libDynSysVis.a (NOTA:  quitamos el 'lib' y el '.a')
-LDFLAGS  = -L$(LIB_SDK)/lib -lDynSysVis -lsfml-graphics -lsfml-window -lsfml-system
+# -lopengl32 es para el recorte de sissors
+LDFLAGS  = -L$(LIB_SDK)/lib -lDynSysVis -lsfml-graphics -lsfml-window -lsfml-system -lopengl32
 
 # --- Regla de Ejecución ---
 run:

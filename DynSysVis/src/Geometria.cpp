@@ -88,8 +88,15 @@ void RectanguloRedondeado::generar(sf::Vector2f size, float radio, sf::Color bgC
     generarBorde(contorno, {0.f, 0.f}, size, radio, 2.0f, 40, extColor);
 }
 
-void RectanguloRedondeado::draw( sf::RenderWindow& window, const sf::Transform& transform) {
+void RectanguloRedondeado::draw( sf::RenderWindow& window, const sf::Transform& transform){
     window.draw(background, transform);
+    window.draw(contorno, transform);
+}
+
+void RectanguloRedondeado::drawBack( sf::RenderWindow& window, const sf::Transform& transform){
+    window.draw(background, transform);
+}
+void RectanguloRedondeado::drawCont( sf::RenderWindow& window, const sf::Transform& transform){
     window.draw(contorno, transform);
 }
 

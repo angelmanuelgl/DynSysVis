@@ -138,14 +138,33 @@ sf::RenderStates Panel::getInternalState() const {
     return states;
 }
 
-void Panel::draw(void) {
-    elMarco.draw(window, mytransform); 
+/*
+     --- --- --- D I B U J A R --- ---
+*/
+void Panel::aplicarRecorte(const sf::RenderWindow& window, sf::Vector2f pos, sf::Vector2f tam) {
+    // 1. Obtener la posición en la pantalla (considerando el View actual de SFML)
+    sf::Vector2i posPantalla = window.mapCoordsToPixel(pos);
+    sf::Vector2i tamPantalla = window.mapCoordsToPixel(pos + tam) - posPantalla;
 
+    // 2. Voltear el eje Y para OpenGL (SFML 0 arriba -> OpenGL 0 abajo)
+    int yReverso = window.getSize().y - (posPantalla.y + tamPantalla.y);
+
+    // 3. Activar el recorte
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(posPantalla.x, yReverso, tamPantalla.x, tamPantalla.y);
+}
+
+
+void Panel::draw(void) {
+  
+    // dibujar el marco al final
+    elMarco.draw(window, mytransform); 
     
     // getInternalState() devuelve el sf::RenderStates con mytransform
     sf::RenderStates states = getInternalState();
     sf::Vector2f sizeContenido = size;
-    
+    sf::Vector2f posContenido = pos_actual;
+
     // si tiene titulo, reservar espacio
     if( titulo ){   
         titulo->draw(window, states);
@@ -153,13 +172,19 @@ void Panel::draw(void) {
         
         // desplazar hacia abajo el contenido
         states.transform.translate(0, h);
+        posContenido.y += h; // 
         sizeContenido.y -= h;
     }
 
     // si tiene contenido se dibujar
     if( contenido ){
+        // recorte
+        aplicarRecorte(window, posContenido, sizeContenido);
         contenido->draw(window, states, sizeContenido);
+        glDisable(GL_SCISSOR_TEST);
     } 
+
+    elMarco.drawCont(window, mytransform); 
 }
 
 /*

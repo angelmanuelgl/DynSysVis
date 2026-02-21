@@ -40,11 +40,17 @@
 #include "dsv/graphics3D/Grafica3D.hpp"
 // #include "dsv/graphics3D/GraficaND.hpp"
 
-// --- Simulacion Matematicas ---
-#include "dsv/simulation/Modelos.hpp"
-#include "dsv/simulation/Integradores.hpp"
+
 
 // --- Estilo ---
 #include "dsv/style/Temas.hpp"
+
+
+// --- Simulacion Matematicas ---
+#include "dsv/simulation/Integradores.hpp"
+
+#include "dsv/simulation/Lorenz.hpp"
+#include "dsv/simulation/ORG.hpp"
+#include "dsv/simulation/SIR.hpp"
 
 #endif

@@ -33,12 +33,30 @@ protected:
 public:
     Grafica3D(){
         lim = {-1, 1, -1, 1, -1, 1};
+
+        // agregar ejes // todo mas control, ahcelo opcional, gestioanr limites
+        push_backC(0,0,0, "X", sf::Color::Red);
+        push_backC(50,0,0, "X", sf::Color::Red);
+        push_backC(0,0,0, "Y", sf::Color::Blue);
+        push_backC(0,50,0, "Y", sf::Color::Blue);
+        push_backC(0,0,0, "Z", sf::Color::Green);
+        push_backC(0,0,50, "Z", sf::Color::Green);
     }
 
-    // Agregar puntos a una serie específica
-    void push_back(float x, float y, float z, std::string id = "default", sf::Color color = sf::Color::Cyan) {
+    void agregarSerie(std::string nombre, sf::Color color){
+         coloresSeries[nombre] = color;
+    }
+
+
+    // Agregar puntos a una serie especifica
+    void push_backC(float x, float y, float z, std::string id = "default", sf::Color color = sf::Color::Cyan){
         datosSeries[id].push(x, y, z);
         coloresSeries[id] = color;
+        actualizarLimites(x, y, z);
+    }
+    void push_back(float x, float y, float z, std::string id = "default"){
+        datosSeries[id].push(x, y, z);
+        if( coloresSeries.find(id) == coloresSeries.end() )  coloresSeries[id] = sf::Color::Cyan;
         actualizarLimites(x, y, z);
     }
 
@@ -143,7 +161,9 @@ public:
     }
 
     void draw(sf::RenderWindow& window, sf::RenderStates states, sf::Vector2f pSize) override {
-        // Dibujar ejes (Opcional, pero ayuda a orientarse)
+      
+        
+        
         // dibujarCajaLites(window, states, pSize);
 
         for (auto& [id, cola] : datosSeries) {

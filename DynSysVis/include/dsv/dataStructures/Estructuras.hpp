@@ -57,12 +57,8 @@ public:
         max_deck.clear();
         min_deck.clear();
     }
-
-
 };
 
-
-// end dvs
 
 
 /**
@@ -118,7 +114,6 @@ public:
 };
 
 
-
 /**
  * --- DESTINADO A USAR EN 3D ---
  * Usa lo anteior para hacer 2d, se usara mucho
@@ -148,8 +143,6 @@ public:
         qZ.pop();
     }
     
-
-
     // Gets
     sf::Vector3f operator[](size_t i) const {
         return sf::Vector3f(
