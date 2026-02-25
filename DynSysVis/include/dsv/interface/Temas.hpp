@@ -1,0 +1,357 @@
+/*  * autor: Angel Manuel Gonzalez Lopez 
+    * github: https://github.com/angelmanuelgl
+    * web: https://angelmanuelgl.github.io/
+    * 
+    * - - - - - - -  -  DynSysVis  - - - - - - - - - - 
+    * Dynamical System Visualizer Real-Time
+    * libreria de herramientas graficas para monitoreo de datos 
+    * y comportamiento de sistemas complejos en tiempo Real.
+*/
+/*  Temas.hpp
+    -> sirvira para gestionar colores generales, 
+    -> poder elegir en assets/config/colores.txt una paleta separado del ejecutable 
+    -> agregar nombres de colroes de acceso rapido dsv::Color::terracota
+    -> funciones que devulven un degradado dado la posicon i y el largo totoal (int i, int n)
+    -> //todo interpolar entre dos colores facilemnte 
+*/
+#ifndef TEMAS_HPP
+#define TEMAS_HPP
+
+
+// std y sfl
+#include <SFML/Graphics.hpp>
+#include <cmath>
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+
+// dsv
+#include "dsv/core/Logger.hpp"
+
+
+
+namespace dsv {
+
+namespace Color{
+    const sf::Color rojo(255, 100, 130, 255);
+    const sf::Color naranja(255, 160, 60, 255);
+    const sf::Color amarillo(255, 235, 100, 255);
+    const sf::Color verde(100, 255, 170, 255);
+    const sf::Color aqua(80, 230, 210, 255);     // Nuevo
+    const sf::Color celeste(130, 245, 255, 255);
+    const sf::Color cian(100, 210, 255, 255);
+    const sf::Color azul(110, 170, 255, 255);
+    const sf::Color violeta(160, 110, 255, 255);
+    const sf::Color morado(190, 130, 255, 255);
+    const sf::Color rosa(255, 80, 140, 255);
+    const sf::Color marron(160, 110, 90, 255);    // Nuevo
+
+    // --- Acento / Claros (Desaturados/Pastel) ---
+    const sf::Color rojo_l(214, 122, 131, 255);
+    const sf::Color naranja_l(235, 165, 145, 255);
+    const sf::Color amarillo_l(255, 225, 160, 255);
+    const sf::Color verde_l(185, 212, 160, 255);
+    const sf::Color aqua_l(160, 210, 200, 255);
+    const sf::Color cian_l(155, 210, 225, 255);
+    const sf::Color azul_l(150, 180, 210, 255);
+    const sf::Color morado_l(205, 165, 195, 255);
+    const sf::Color rosa_l(255, 150, 180, 255);   // Ajustado para ser más claro
+    const sf::Color marron_l(190, 155, 140, 255);
+
+    // --- Escala de Grises y Neutros ---
+    const sf::Color blanco(255, 255, 255, 255);
+    const sf::Color gris_claro(167, 169, 171, 255); // grey_40
+    const sf::Color gris(135, 137, 140, 255);       // grey_56
+    const sf::Color gris_oscuro(105, 106, 108, 255); // grey_72
+    const sf::Color fondo_panel(69, 69, 71, 255);    // dark_grey
+    const sf::Color fondo_oscuro(30, 31, 34, 255);   // Tono típico de dashboard
+    const sf::Color negro(0, 0, 0, 255);
+
+    // --- Variantes Extra para Gráficos (Muted Colors) ---
+    const sf::Color verde_bosque(75, 140, 100, 255);
+    const sf::Color azul_noche(60, 80, 120, 255);
+    const sf::Color terracota(180, 90, 80, 255);
+    const sf::Color oro(215, 170, 70, 255);
+    
+    // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    // --- --- --- --- ---  DEGRADADOS POR INDICE  --- --- --- --- ---
+    // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    //  Arcoiris
+    inline sf::Color Arcoiris(int i, int n) {
+        float f = 0.3f; // frecuencia
+        return sf::Color(
+            std::sin(f * i + 0) * 127 + 128,
+            std::sin(f * i + 2) * 127 + 128,
+            std::sin(f * i + 4) * 127 + 128
+        );
+    }
+
+    // Cyberpunk: Magenta Neon -> Cyan Electrico
+    inline sf::Color Cyberpunk(int i, int n) {
+        float ratio = static_cast<float>(i) / (n - 1);
+        return sf::Color(
+            255 * (1.0f - ratio), // El rojo baja
+            200 * ratio,          // El verde sube
+            255                   // El azul siempre a tope
+        );
+    }
+
+    
+    // Fuego e Hielo: De Rojo ->  Azul 
+    inline sf::Color FuegoHielo(int i, int n) {
+        float ratio = static_cast<float>(i) / (n - 1);
+        return sf::Color(
+            255 * (1.0f - ratio), // Rojo en i=0
+            50,                    // Un toque de verde para suavizar
+            255 * ratio           // Azul en i=n
+        );
+    }
+    
+    // morado oscuro -> Verde -> Amarillo brillante. 
+    inline sf::Color Viridis(int i, int n) {
+        float r = static_cast<float>(i) / (n - 1);
+        // Aproximación de los nodos de Viridis
+        return sf::Color(
+            static_cast<sf::Uint8>(253 * r * r + 68 * (1-r)), // R
+            static_cast<sf::Uint8>(231 * r + 12 * (1-r)),     // G
+            static_cast<sf::Uint8>(37 + 150 * r * (1-r))      // B
+        );
+    }
+    // Negro/Morado -> Rojo/Naranja -> Blanco/Amarillo
+    inline sf::Color Magma(int i, int n) {
+        float r = static_cast<float>(i) / (n - 1);
+        return sf::Color(
+            static_cast<sf::Uint8>(255 * std::pow(r, 0.4f)), // R sube rápido
+            static_cast<sf::Uint8>(200 * std::pow(r, 1.5f)), // G sube lento
+            static_cast<sf::Uint8>(150 * std::pow(r, 3.0f) + 50 * (1-r)) // B
+        );
+    }
+    //l Violeta -> Magenta -> Naranja.
+    inline sf::Color Plasma(int i, int n) {
+        float r = static_cast<float>(i) / (n - 1);
+        return sf::Color(
+            static_cast<sf::Uint8>(237 * std::pow(r, 0.7f) + 13 * (1-r)),
+            static_cast<sf::Uint8>(252 * std::pow(r, 2.0f) + 30 * (1-r)),
+            static_cast<sf::Uint8>(255 * std::sin(r * 1.5f) + 100 * (1-r))
+        );
+    }
+    //  Verde oscuro -> Esmeralda -> Lima.
+    inline sf::Color Bosque(int i, int n) {
+        float r = static_cast<float>(i) / (n - 1);
+        return sf::Color(
+            30 + 150 * r,  // Rojo bajo
+            80 + 175 * r,  // Verde dominante
+            50             // Azul fijo
+        );
+    }
+    // Azul marino -> Turquesa -> Blanco espuma.
+    inline sf::Color Oceano(int i, int n){
+        float r = static_cast<float>(i) / (n - 1);
+        return sf::Color(
+            static_cast<sf::Uint8>(255 * std::pow(r, 2.0f)), // Solo al final blanquea
+            static_cast<sf::Uint8>(100 + 155 * r),
+            static_cast<sf::Uint8>(150 + 105 * r)
+        );
+    }
+
+    inline int interpolaCol( int a, int b, float t ){
+        t = std::max(0.0f, std::min(1.0f, t));
+        int ans = a + (b-a) * t;
+
+        if( ans > 255) return 225;
+        if( ans < 0 ) return 0;
+        return ans;
+    }
+
+    
+    // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    // --- --- --- --- ---  DEGRADADOS POR PALETA  --- --- --- --- ---
+    // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    // --- Generador Universal de Paletas ---
+    template<typename Func>
+    inline std::vector<sf::Color> generarPaleta(Func funcionColor, int pasos = 10) {
+        std::vector<sf::Color> paleta;
+        paleta.reserve(pasos);
+        for( int i = 0; i < pasos; ++i){
+            paleta.push_back(funcionColor(i, pasos));
+        }
+        return paleta;
+    }
+
+    // --- Versiones de Paleta Completa (con Lambdas) ---
+    inline std::vector<sf::Color> FuegoHielo() { 
+        return generarPaleta([](int i, int n) { return FuegoHielo(i, n); }); 
+    }
+    inline std::vector<sf::Color> Cyberpunk()  { 
+        return generarPaleta([](int i, int n) { return Cyberpunk(i, n); }); 
+    }
+    inline std::vector<sf::Color> Arcoiris()   { 
+        return generarPaleta([](int i, int n) { return Arcoiris(i, n); }); 
+    }
+    inline std::vector<sf::Color> Viridis()    { 
+        return generarPaleta([](int i, int n) { return Viridis(i, n); }); 
+    }
+    inline std::vector<sf::Color> Magma()      { 
+        return generarPaleta([](int i, int n) { return Magma(i, n); }); 
+    }
+    inline std::vector<sf::Color> Plasma()     { 
+        return generarPaleta([](int i, int n) { return Plasma(i, n); }); 
+    }
+    inline std::vector<sf::Color> Bosque()     { 
+        return generarPaleta([](int i, int n) { return Bosque(i, n); }); 
+    }
+    inline std::vector<sf::Color> Oceano()     { 
+        return generarPaleta([](int i, int n) { return Oceano(i, n); }); 
+    }
+
+
+    // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    // --- --- --- --- ---  DEGRADADOS utileria  --- --- --- --- ---
+    // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    inline sf::Color interpolarColores(sf::Color a, sf::Color b, float t ){
+    return sf::Color(
+        static_cast<sf::Uint8>( interpolaCol( a.r, b.r, t ) ),
+        static_cast<sf::Uint8>( interpolaCol( a.g, b.g, t ) ),
+        static_cast<sf::Uint8>( interpolaCol( a.b, b.b, t ) ),
+        static_cast<sf::Uint8>( interpolaCol( a.a, b.a, t ) )
+    );
+    }
+    inline sf::Color obtenerColorDegradado(const std::vector<sf::Color>& paleta, float t) {
+        if(paleta.empty()) return sf::Color::Magenta;
+        if( paleta.size() == 1) return paleta[0];
+        if( t <= 0.0f ) return paleta.front();
+        if( t >= 1.0f ) return paleta.back();
+
+        // ver en que segmento estamos
+        float fraccion = t * (paleta.size() - 1);
+        size_t indice = static_cast<size_t>(fraccion);
+        // el sobrante para interpolar entre indice e indice+1
+        float tLocal = fraccion - indice; 
+        return interpolarColores(paleta[indice], paleta[indice + 1], tLocal);
+    }
+
+
+    
+    // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    // --- --- --- --- ---  LOL LOL LOL LOL  --- --- --- --- ---
+    // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    //  mapa  se guardan todos los colores del txt
+    inline std::map<std::string, sf::Color> colores;
+
+    // obtener cualquier color por su nombre en el txt
+    inline sf::Color obtener(const std::string& nombre) {
+        if( colores.find(nombre) != colores.end()) {
+            return colores[nombre];
+        }
+        return sf::Color::Magenta; // color de error si no existe
+    }
+    
+    // para acceder mas facil
+    inline sf::Color c(const std::string& nombre) { return obtener(nombre); }
+
+    // --- lectura --- 
+    inline bool siEs( int valor ){
+        return valor >= 0 && valor <= 255;
+    }
+
+    inline void cargar(const std::string& ruta) {
+        std::ifstream file(ruta);
+
+        std::string tag;
+        int r, g, b, a;
+        std::string posible;
+
+        while( file >> tag  ){
+            // es posible agregar comentarios con /
+            if( tag.size() >= 1 && tag[0] == '/') {
+                std::string basura;
+                std::getline(file, basura); // Consume el resto de la linea y la tira
+                continue;
+            }
+            
+            // si no hay nada mas por leer
+            if (!(file >> posible)) break; 
+
+            // --- un color ya usado ---
+            if(  std::isalpha( static_cast<unsigned char>(posible[0]) )  ){
+                if( colores.count(posible) ){
+                    colores[tag] = colores[posible];
+                } 
+                // no has definido el color ya sadp
+                else {
+                    std::cerr << "ERROR: El alias '" << posible << "' no existe todavia.\n";
+                }
+            }
+            // --- nuevo color ---
+            else{
+                // pasar la estring
+                try{
+                    r = std::stoi(posible);
+                    file >> g >> b >> a;
+                    if(  siEs(r) && siEs(g) && siEs(b) && siEs(a)  ){
+                        colores[tag] = sf::Color(r,g,b,a);
+                    }else{
+                        DSV_LOG_ERROR("ERROR: Valores fuera de rango (0-255) en " + tag);
+                    }
+                }catch (...){
+                    DSV_LOG_ERROR("ERROR:  Formato numerico invalido en " + tag);
+                    // mandar  la basura el resto por si en als demas lineas si hay algo
+                    std::string basura;
+                    std::getline(file, basura);
+                }
+
+            }
+            
+        } 
+    }
+}
+
+
+
+ // --- configurar ventana ---
+ namespace Sistema {
+    // Estructura para devolver los parametros configurados
+    struct ConfigVentana {
+        unsigned int ancho;
+        unsigned int alto;
+        sf::ContextSettings settings;
+    };
+
+    inline ConfigVentana obtenerConfiguracionIdeal(float escala = 0.8f) {
+        ConfigVentana config;
+        
+        //  Antialiasing (Suavizado de bordes)
+        config.settings.antialiasingLevel = 8;
+
+        // resolucion del monitor
+        sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
+
+        // calcular tam relativo
+        config.ancho = static_cast<unsigned int>(desktop.width * escala);
+        config.alto = static_cast<unsigned int>(desktop.height * escala);
+
+        return config;
+    }
+
+    // crear la venta
+    inline void inicializarVentana(sf::RenderWindow& window, const std::string& titulo) {
+        ConfigVentana config = obtenerConfiguracionIdeal(1.0f);
+
+        window.create(sf::VideoMode(config.ancho, config.alto), 
+                      titulo, 
+                      sf::Style::Fullscreen, //  Default // Fullscreen
+                      config.settings);
+        
+        window.setFramerateLimit(60);
+
+        // window.setPosition(sf::Vector2i(
+        //     (desktop.width - ancho) / 2,
+        //     (desktop.height - alto) / 2
+        // ));
+    }
+}
+
+}
+#endif

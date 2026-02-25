@@ -97,8 +97,10 @@ luego compilar  proyectos con
 ```
 mingw32-make run APP=apps/pendulo/pendulo.cpp
 mingw32-make run APP=apps/pendulo/penduloFase.cpp
+
 mingw32-make run APP=apps/hormigas/main.cpp
 mingw32-make run APP=apps/hormigas/hormigasFase.cpp
+
 mingw32-make run APP=apps/pruebasFast/pruebas.cpp
 
 mingw32-make run APP=apps/mix/lor.cpp

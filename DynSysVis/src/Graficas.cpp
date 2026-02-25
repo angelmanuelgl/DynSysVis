@@ -24,7 +24,7 @@ namespace dsv{
     --- --- --- --- --- --- --- --- ---  --- --- ---     
     --- --- --- --- --- --- --- --- ---  --- --- ---
 */
-void Serie::draw(sf::RenderWindow& window, sf::RenderStates states, 
+void Serie2D::draw(sf::RenderWindow& window, sf::RenderStates states, 
                 std::function<sf::Vector2f(sf::Vector2f)> mapearPunto,
                 bool sombreado, bool desvanece, bool cabeza, float valorReferenciaY ){
     
@@ -88,12 +88,12 @@ void Serie::draw(sf::RenderWindow& window, sf::RenderStates states,
 
 
 
-void Serie::recalcularExtremos(void){
+void Serie2D::recalcularExtremos(void){
     if( puntos.empty() ) return;
     misLimites = puntos.getLimites();
 }
 
-void Serie::agregarPunto(sf::Vector2f p){
+void Serie2D::agregarPunto(sf::Vector2f p){
     puntos.push(p.x, p.y);
 
     if( puntos.size() > maxPoints ){
@@ -143,7 +143,7 @@ void GraficaBase::push_back_Gen(sf::Vector2f p, std::string clave) {
 
     // creae la serie si no existe
     if( series.find(clave) == series.end() ){
-        series[clave] = Serie(clave, lineaResaltado, maxPoints);
+        series[clave] = Serie2D(clave, lineaResaltado, maxPoints);
     }
 
     // agregar
@@ -159,7 +159,7 @@ void GraficaBase::agregarSerie(std::string nombre, sf::Color color) {
         it->second.setColor(color); 
     } else {
         // Si es nueva, la creamos con los puntos maximos actuales de la gráfica
-        series[nombre] = Serie(nombre, color, maxPoints);
+        series[nombre] = Serie2D(nombre, color, maxPoints);
     }
 }
 

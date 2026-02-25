@@ -41,7 +41,7 @@ namespace dsv{
 */
 
 
-class Serie {
+class Serie2D {
 private:
     // info de esta serie
     std::string nombre;
@@ -57,9 +57,9 @@ private:
 
 public:
     // constructores
-    Serie() : nombre(""), color(sf::Color::White), maxPoints(500) {}
+    Serie2D() : nombre(""), color(sf::Color::White), maxPoints(500) {}
 
-    Serie(std::string nombre, sf::Color color, unsigned int maxPts) 
+    Serie2D(std::string nombre, sf::Color color, unsigned int maxPts) 
         : nombre(nombre), color(color), maxPoints(maxPts){}
 
     // utilidades
@@ -106,7 +106,7 @@ public:
 class GraficaBase : public Objeto {
 protected:
     // lineas
-    std::map<std::string, Serie> series;
+    std::map<std::string, Serie2D> series;
     std::string seriePrincipal = "default";
 
     // datos de todas las lineas

@@ -30,6 +30,7 @@
 // --- interfaz y layour ---
 #include "dsv/interface/Tablero.hpp"
 #include "dsv/interface/Vista.hpp"
+#include "dsv/interface/Temas.hpp"
 
 // --- graficos en 2D ---
 #include "dsv/graphics2D/Geometria.hpp"
@@ -43,7 +44,6 @@
 
 
 // --- Estilo ---
-#include "dsv/style/Temas.hpp"
 
 
 // --- Simulacion Matematicas ---

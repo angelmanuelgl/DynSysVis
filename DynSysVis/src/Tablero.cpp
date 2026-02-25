@@ -116,6 +116,13 @@ namespace dsv {
             "A3 . B3"
         });
     }
+    void Tablero::setPanelDegradado(sf::Color colorTop, sf::Color colorBot){
+        for( auto& pair : panelesConId ){
+            Panel& panel = *pair.second;
+            panel.setDegradado(colorTop, colorBot);
+        }
+    }
+
 
     Tablero::Tablero(sf::RenderWindow& ventana, const Layout& layout, sf::Color color1, sf::Color color2)
         : window(ventana), colorFondo1(color1), colorFondo2(color2), fondo(sf::Quads, 4 ){

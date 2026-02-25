@@ -66,3 +66,67 @@ La diferencia esta en seguir el punto por ejemplo (t,t) con una cola de maximo 1
 Segun el caso nos puede interesar uno y otro
 * *activado** Vigilar que tan lejos se van variables en el espacio fase, siguiendo una **direccion** de equilibrio
 * **desactivado** Vigilar el comportamineto a **detalle** de la curva en el espacio fase.
+
+
+2D Auto-ajustable
+* EspacioFase2D 
+* GraficaTiempo 
+* [] (maybe) EspacioFase3D
+
+Libre Navegación (Zoom/Pan)
+* 2D Libre (Mouse)
+* 3D Libre (Mouse)
+* Proyecta 3D en un plano 2D estático	FlatProjector3D
+
+
+
+En la graica 3D podemos hacer
+```cpp
+miGrafica.getEjes().setLimites(-50, 50, -50, 50, -50, 50);
+miGrafica.getEjes().colorX = sf::Color::Yellow;
+```
+
+
+## Gestión de Memoria y Constancia (Const Overloading)
+
+Para garantizar que la librería sea eficiente y segura (const-correctness), la estructura `Serie` implementa la sobrecarga de métodos de acceso a punteros. Esto permite que el motor de dibujo acceda a los datos en modo "solo lectura" y que los algoritmos de simulación puedan modificar los datos si es necesario.
+
+### 1. Puntero Constante (Solo Lectura)
+Se utiliza dentro de métodos `const` (como el `draw` de SFML). Garantiza que el proceso de visualización no corrompa accidentalmente los datos del buffer.
+- **Firma:** `inline const float* getPointer(size_t i) const`
+- **Uso:** Ideal para proyecciones 3D y renderizado.
+
+### 2. Puntero No-Constante (Edición)
+Se activa cuando la instancia de la serie es mutable. Permite modificar los valores de un punto ya existente en el buffer sin necesidad de hacer un nuevo `push_back`.
+- **Firma:** `inline float* getPointer(size_t i)`
+- **Uso:** Filtros de post-procesamiento o corrección de datos en tiempo real.
+
+### Implementación en Serie.hpp
+
+```cpp
+// Versión para cuando la serie es constante (ej. en el draw)
+inline const float* getPointer(size_t i) const {
+    return &buffer[getIndiceReal(i) * dimension];
+}
+
+// Versión para cuando se requiere modificar los datos manualmente
+inline float* getPointer(size_t i) {
+    return &buffer[getIndiceReal(i) * dimension];
+}
+```
+
+El compilador elige la versión adecuada en tiempo de compilación basándose en si el objeto Serie es const o no. Al estar marcadas como inline, el costo de decidir qué función usar es cero, ya que se resuelve antes de ejecutar el programa.
+
+Ejemplos de uso
+
+```cpp
+void procesar(Serie& s) {
+    float* datos = s.getPointer(0); 
+    datos[0] = 10.5f; // ¡PERMITIDO! El compilador usa la versión de edición.
+}
+
+void dibujar(const Serie& s) {
+    const float* datos = s.getPointer(0); 
+    // datos[0] = 10.5f; // ERROR DE COMPILACIÓN. El compilador usa la versión de solo lectura.
+}
+```

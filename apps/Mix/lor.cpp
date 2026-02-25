@@ -2,11 +2,6 @@
 #include <cmath>
 #include "DynSysVis.hpp"
 
-struct EntidadSIR {
-    dsv::mod::SIR_Instance sim; // Los datos puros de simulación
-    std::string id;             // Metadato visual
-    sf::Color color;            // Metadato visual
-};
 
 int main() {
     dsv::Color::cargar("assets/config/colores.txt");
@@ -21,34 +16,34 @@ int main() {
     dsv::Layout miLayout = {
         "3d 3d  f2",
         "3d 3d  f3 ",
-        "3d 3d  f4   ",
+        "3d 3d  f4 "
     };
-    dsv::Tablero tablero(window, miLayout,  sf::Color(40,40,50),  sf::Color(20,20,25));
-
+    dsv::Tablero tablero(window, miLayout,  sf::Color(30,30,40),  sf::Color(20,20,25));
+    
     // Paneles
-    auto faseXY = tablero.add<dsv::EspacioFase2D>("Fase: XY", dsv::Color::blanco, "f2");
-    auto faseYZ = tablero.add<dsv::EspacioFase2D>("Fase: YZ", dsv::Color::blanco, "f3");
-    auto faseXZ = tablero.add<dsv::EspacioFase2D>("Fase: XZ", dsv::Color::blanco, "f4");
+    dsv::Vista< dsv::EspacioFase2D > faseXY = tablero.add<dsv::EspacioFase2D>("Fase: XY", dsv::Color::violeta, "f2");
+    dsv::Vista< dsv::EspacioFase2D > faseYZ = tablero.add<dsv::EspacioFase2D>("Fase: YZ", dsv::Color::violeta, "f3");
+    dsv::Vista< dsv::EspacioFase2D > faseXZ = tablero.add<dsv::EspacioFase2D>("Fase: XZ", dsv::Color::violeta, "f4");
 
-    auto fase3D = tablero.add<dsv::Grafica3D>("Trayectorias Modelo Lorentz", dsv::Color::blanco, "3d");
-    auto tiempo = tablero.add<dsv::GraficaTiempo>("Evolución Infectados (20 Tiradas)", dsv::Color::blanco, "t1");
+    dsv::Vista< dsv::Grafica3D > fase3D = tablero.add<dsv::Grafica3D>("Trayectorias Modelo Lorentz", dsv::Color::violeta, "3d");
+     
+    tablero.setPanelDegradado( sf::Color(30,30,40),  sf::Color(20,20,25));
+    
 
-    faseXY.panel.setDegradado( sf::Color(40,40,50), sf::Color(20,20,25) );
-    faseYZ.panel.setDegradado( sf::Color(40,40,50), sf::Color(20,20,25) );
-    faseXZ.panel.setDegradado( sf::Color(40,40,50), sf::Color(20,20,25) );
-    fase3D.panel.setDegradado( sf::Color(40,40,50), sf::Color(20,20,25) );
-
-    // Configuración visual
-    tiempo->configurarLimites(0, 50, 0, 100, true);
-    tiempo->ponerSombreado(false);
-
+    // --- --- --- Configuracion visual --- --- --- 
     for( auto fff : { faseXY, faseYZ, faseXZ } ){
         fff->activarSeguimiento(true);
         fff->configurarMaxPoints(1000);
     }
+    fase3D.objeto.getGestor().setMaxPointsSeries(1000);
+    fase3D.objeto.getGestor().setGrosorSeries(15.5f);
+    fase3D.objeto.getGestor().setAdelgazado(false);
+    fase3D.objeto.getGestor().setDifuminado(false);
+    // fase3D.objeto.getGestor().setColorSeries( dsv::Color::Magma() );
     
-    // Inicializar 20 instancias
-    const int numSims = 40;
+    
+    // --- --- ---  Inicializar 20 instancias --- --- --- 
+    const int numSims = 5;
     std::vector<dsv::mod::Lorenz_Instance> sims(numSims);
     
     // rangos aleatorios
@@ -57,11 +52,10 @@ int main() {
     std::uniform_real_distribution<float> uniform( -20.0f, 20.0f );
 
 
-
     for( int i = 0; i < numSims; i++ ){
         std::string id = "Sim" + std::to_string(i);
         sf::Color col = dsv::Color::Magma(i, numSims);
-        col.a = 100;
+        // col.a = 20;
 
     
         sims[i].state = { uniform(gen),uniform(gen),uniform(gen)}; 
@@ -69,13 +63,12 @@ int main() {
         
         for( auto fff : { faseXY, faseYZ, faseXZ} )
             fff-> agregarSerie(id, col);
-
-        tiempo->agregarSerie(id, col);
-
-        col.a = 70;
-        fase3D->agregarSerie(id, col);
+        
+    
+        // fase3D.objeto.getGestor().agregarSerie(i);
     }
 
+   
     sf::Clock clock;
     sf::Time accumulator = sf::Time::Zero;
     sf::Time ups = sf::seconds(0.01f);
@@ -110,9 +103,10 @@ int main() {
                 faseYZ->push_back(s.state[1], s.state[2], id);
                 faseXZ->push_back(s.state[0], s.state[2], id);
 
-                tiempo->push_back(s.state[1], s.t, id);
-                fase3D->push_back(s.state[0], s.state[1], s.state[2], id);
+                fase3D->push_back(s.state[0], s.state[1], s.state[2], i);
+                
             }
+            
             accumulator -= ups;
         }
 

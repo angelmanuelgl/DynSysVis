@@ -82,6 +82,8 @@ class Tablero {
 
         // dibujar
         void setFondoDegradado( sf::Color color1, sf::Color color2);   
+        void setPanelDegradado( sf::Color colorTop, sf::Color colorBot);
+
         void draw();
 
         // TODO, mejorar esta cosa

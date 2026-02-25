@@ -16,7 +16,7 @@ int main() {
     dsv::Layout miLayout = {
         "3d 3d 3d f1",
         "3d 3d 3d f2",
-        "3d 3d 3d f3",
+        "3d 3d 3d  f2",
         "t1 t1 t1 t1"
     };
     dsv::Tablero tablero(window, miLayout,  sf::Color(40,40,50),  sf::Color(20,20,25));
@@ -33,13 +33,8 @@ int main() {
     tiempo->configurarLimites(0, 50, 0, 100, true);
     tiempo->ponerSombreado(false);
     
-    for( auto fase : {faseIR,faseSI,faseRS }){
-          fase.panel.setDegradado( sf::Color(40,40,50), sf::Color(20,20,25) );
-    }
-  
-    fase3D.panel.setDegradado( sf::Color(40,40,50), sf::Color(20,20,25) );
-    tiempo.panel.setDegradado( sf::Color(40,40,50), sf::Color(20,20,25) );
-
+    // aplicarlo a todos de una vez
+    tablero.setPanelDegradado(  sf::Color(30,30,40),  sf::Color(20,20,25));
     
     // Inicializar 20 instancias
     const int numSims = 20;
