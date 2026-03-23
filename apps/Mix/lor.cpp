@@ -36,6 +36,7 @@ int main() {
     
 
     // --- --- --- Configuracion visual --- --- --- 
+    fase3D.objeto.getEjes().setLimites(-50, 100);
     for( auto fff : { faseXY, faseYZ, faseXZ } ){
         fff->activarSeguimiento(true);
         fff->configurarMaxPoints(50);
@@ -84,10 +85,10 @@ int main() {
         // fase3D_proye.objeto.getGestor().agregarSerie(i, xd);
 
         if( !i){
-            fase3D.objeto.getGestor().agregarSerie(i, dsv::Color::rojo);
-            fase3D_proye.objeto.getGestor().agregarSerie(i, dsv::Color::rojo);
-            fase3D.objeto.getGestor().setGrosor(15, i);
-            fase3D_proye.objeto.getGestor().setGrosor(15, i);
+            fase3D.objeto.getGestor().agregarSerie(i, sf::Color(255,0,0) );
+            fase3D_proye.objeto.getGestor().agregarSerie(i, sf::Color(255,0,0));
+            fase3D.objeto.getGestor().setGrosor(8, i);
+            fase3D_proye.objeto.getGestor().setGrosor(8, i);
         }
 
     }

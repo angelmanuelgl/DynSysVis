@@ -139,9 +139,7 @@ public:
  * Usa lo anteior para hacer 2d, se usara mucho
  * con acceso [] devuelve sf::Vector2f
 */
-struct Limites3D {
-    float minX, maxX, minY, maxY, minZ, maxZ;
-};
+
 template <typename T>
 class MonotonicQueue3D {
 private:

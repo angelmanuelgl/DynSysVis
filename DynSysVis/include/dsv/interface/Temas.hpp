@@ -341,7 +341,7 @@ namespace Color{
 
         window.create(sf::VideoMode(config.ancho, config.alto), 
                       titulo, 
-                      sf::Style::Fullscreen, //  Default // Fullscreen
+                      sf::Style::Default, //  Default // Fullscreen
                       config.settings);
         
         window.setFramerateLimit(60);

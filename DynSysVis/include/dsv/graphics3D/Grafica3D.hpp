@@ -28,8 +28,10 @@ protected:
 public:
     Grafica3D( ){ 
         // Inicializar limites para el auto-ajuste de escala
-        lim.minX = lim.minY = lim.minZ = std::numeric_limits<float>::max();
-        lim.maxX = lim.maxY = lim.maxZ = std::numeric_limits<float>::lowest();
+        // lim.minX = lim.minY = lim.minZ = std::numeric_limits<float>::max();
+        // lim.maxX = lim.maxY = lim.maxZ = std::numeric_limits<float>::lowest();
+        lim.minX = lim.minY = lim.minZ = -250;
+        lim.maxX = lim.maxY = lim.maxZ = 250;
         // lim.minX = lim.minY = lim.minZ = -1;
         // lim.maxX = lim.maxY = lim.maxZ = 1;
 
@@ -68,18 +70,18 @@ public:
         // // ejes.maxZ = lim.maxZ + (anchoZ * margen);
 
         // Eje X: De ejes.minX a ejes.maxX pasando por el ORIGEN del mundo
-        sf::Vector2f p1x = camara.proyectar({ejes.minX, 0.f, 0.f}, pSize, lim);
-        sf::Vector2f p2x = camara.proyectar({ejes.maxX, 0.f, 0.f}, pSize, lim);
+        sf::Vector2f p1x = camara.proyectar({ejes.minX, 0.f, 0.f}, pSize);
+        sf::Vector2f p2x = camara.proyectar({ejes.maxX, 0.f, 0.f}, pSize);
         dsv::draw::linea(window, states, {p1x, p2x}, ejes.colorX, ejes.grosor);
 
         // Eje Y: 
-        sf::Vector2f p1y = camara.proyectar({0.f, ejes.minY, 0.f}, pSize, lim);
-        sf::Vector2f p2y = camara.proyectar({0.f, ejes.maxY, 0.f}, pSize, lim);
+        sf::Vector2f p1y = camara.proyectar({0.f, ejes.minY, 0.f}, pSize);
+        sf::Vector2f p2y = camara.proyectar({0.f, ejes.maxY, 0.f}, pSize);
         dsv::draw::linea(window, states, {p1y, p2y}, ejes.colorY, ejes.grosor);
 
         // Eje Z:
-        sf::Vector2f p1z = camara.proyectar({0.f, 0.f, ejes.minZ}, pSize, lim);
-        sf::Vector2f p2z = camara.proyectar({0.f, 0.f, ejes.maxZ}, pSize, lim);
+        sf::Vector2f p1z = camara.proyectar({0.f, 0.f, ejes.minZ}, pSize);
+        sf::Vector2f p2z = camara.proyectar({0.f, 0.f, ejes.maxZ}, pSize);
         dsv::draw::linea(window, states, {p1z, p2z}, ejes.colorZ, ejes.grosor);
     }
 
@@ -104,11 +106,12 @@ public:
 
             for( size_t i = 0; i < serie.count; ++i ){ 
                 sf::Vector3f p3 = serie.getPunto3D(i);
-                puntos2D.push_back(camara.proyectar(p3, pSize, lim));
+                puntos2D.push_back(camara.proyectar(p3, pSize));
             }
 
             // Grosor reactivo al zoom
-            float grosorFinal = serie.grosor * (camara.zoom * 0.5f);
+            float grosorFinal = serie.grosor;
+            // float grosorFinal = serie.grosor * (camara.zoom * 0.5f);
             if (grosorFinal < 1.0f) grosorFinal = 1.0f;
             bool grosorDinamico = serie.adelgazarCola;
 

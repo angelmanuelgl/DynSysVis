@@ -27,15 +27,17 @@ int main() {
     dsv::Tablero tablero(window, miLayout,  sf::Color(40,40,50),  sf::Color(20,20,25));
 
     // Paneles
-    auto faseSI = tablero.add<dsv::EspacioFase2D>("Fase: Susceptibles vs Infectados", dsv::Color::azul, "f1");
-    auto faseIR = tablero.add<dsv::EspacioFase2D>("Fase: Infectados vs Recuperados", dsv::Color::azul, "f2");
-    auto faseRS = tablero.add<dsv::EspacioFase2D>("Fase: Recuperados vs Susceptibles", dsv::Color::azul, "f3");
-    auto fase3D = tablero.add<dsv::Grafica3D>("Trayectorias SIR (S,I,R)", dsv::Color::cian, "3d");
-    auto tiempo = tablero.add<dsv::GraficaTiempo>("Evolucion Infectados (mutiples Tiradas)", dsv::Color::naranja, "t1");
+    dsv::Vista< dsv::EspacioFase2D >  faseSI = tablero.add<dsv::EspacioFase2D>("Fase: Susceptibles vs Infectados", dsv::Color::azul, "f1");
+    dsv::Vista< dsv::EspacioFase2D > faseIR = tablero.add<dsv::EspacioFase2D>("Fase: Infectados vs Recuperados", dsv::Color::azul, "f2");
+    dsv::Vista< dsv::EspacioFase2D > faseRS = tablero.add<dsv::EspacioFase2D>("Fase: Recuperados vs Susceptibles", dsv::Color::azul, "f3");
+    dsv::Vista< dsv::Grafica3D > fase3D = tablero.add<dsv::Grafica3D>("Trayectorias SIR (S,I,R)", dsv::Color::cian, "3d");
+    dsv::Vista< dsv::GraficaTiempo > tiempo = tablero.add<dsv::GraficaTiempo>("Evolucion Infectados (mutiples Tiradas)", dsv::Color::naranja, "t1");
 
 
     // consigurar el fase3D
-    fase3D.objeto.getEjes().setLimites(-50, 210);
+    fase3D.objeto.getEjes().setLimites(-50, 200);
+    fase3D.objeto.getGestor().setAdelgazadoSeries(false);
+    fase3D.objeto.getGestor().setDifuminadoSeries(false);
 
     // Configuración visual
     // fase->configurarLimites(0, 100, 0, 100, true);
@@ -52,6 +54,7 @@ int main() {
     // aplicarlo a todos de una vez
     tablero.setPanelDegradado(  sf::Color(30,30,40),  sf::Color(20,20,25));
     
+
     // Inicializar 20 instancias
     const int numSims = 20;
     std::vector<dsv::mod::SIR_Instance> sims(numSims);
@@ -76,7 +79,8 @@ int main() {
 
         if( i == numSims-1 ){
             fase3D.objeto.getGestor().setGrosor(5.0f, id);
-            fase3D.objeto.getGestor().setColor( dsv::Color::Magma() , id);
+            // fase3D.objeto.getGestor().setColor( dsv::Color::Magma() , id);
+            fase3D.objeto.getGestor().setColor( sf::Color(255,0,0) , id);
         }
     }
 

@@ -94,9 +94,46 @@ namespace sim {
         }
         // n x m matriz
         else {
-            EM_step(sys, dt); // Tu código original de matriz
+            EM_step(sys, dt); 
         }
-}
+    }
+
+    // --- --- ODE --- --- 
+    // Runge-Kutta 4to Orden (RK4)
+    template<typename Instance>
+    void RK4_step(Instance& sys, float dt) {
+        using Model = decltype(sys.model);
+        constexpr size_t d = Model::dim;
+
+        // Estructuras para las 4 etapas
+        std::array<float, d> k1, k2, k3, k4;
+        std::array<float, d> temp_state;
+
+        float h = dt;
+        float h2 = h / 2.0f;
+
+        // k1 = f(t, x)
+        sys.model.drift(sys.state, sys.t, k1);
+
+        // k2 = f(t + h/2, x + h/2 * k1)
+        for(size_t i = 0; i < d; ++i) temp_state[i] = sys.state[i] + h2 * k1[i];
+        sys.model.drift(temp_state, sys.t + h2, k2);
+
+        // k3 = f(t + h/2, x + h/2 * k2)
+        for(size_t i = 0; i < d; ++i) temp_state[i] = sys.state[i] + h2 * k2[i];
+        sys.model.drift(temp_state, sys.t + h2, k3);
+
+        // k4 = f(t + h, x + h * k3)
+        for(size_t i = 0; i < d; ++i) temp_state[i] = sys.state[i] + h * k3[i];
+        sys.model.drift(temp_state, sys.t + h, k4);
+
+        // actualizacion final: x = x + (h/6) * (k1 + 2k2 + 2k3 + k4)
+        for(size_t i = 0; i < d; ++i) {
+            sys.state[i] += (h / 6.0f) * (k1[i] + 2.0f * k2[i] + 2.0f * k3[i] + k4[i]);
+        }
+        
+        sys.t += h;
+    }
 
 } // namespace sim
 } // namespace dsv
