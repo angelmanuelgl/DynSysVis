@@ -64,6 +64,32 @@ public:
 
     virtual ~Objeto() = default;
     virtual void draw(sf::RenderWindow& window, sf::RenderStates states, sf::Vector2f pSize) = 0;
+    
+
+
+  
+
+    // --- --- --- EVENTOS --- --- ---
+    
+
+    // actualizar (llamado externamente antes de gestionarEvento) reocmednaro llamar en el draw
+    sf::FloatRect ultimoBoundsGlobal; 
+    void actualizarBoundsGlobal(sf::RenderStates states, sf::Vector2f pSize) {
+        sf::Vector2f posGlobal = states.transform.transformPoint(0, 0);
+        this->ultimoBoundsGlobal = sf::FloatRect(posGlobal, pSize);
+    }
+
+    virtual void gestionarEvento(const sf::Event& ev, const sf::RenderWindow& win) {}
+
+
+    // --- --- PARA CONTENIDO ESPECIAL --- --- 
+    // no es necesario implementarla
+    // solo la necesitaran los panelesFlotantes, en cualqueir caso estos tienen una medida por defecto asi que dont worry
+    // solo es por si quieres ajustar tu mismo el size dependeinte del contenido, en los panelesFlotanes
+    // los paneles "estaticos" tu defines el tamaño del panel y llama a su contenido para que se dibuje ajsutado a su tamaño
+    virtual sf::Vector2f getSize() const {
+        return sf::Vector2f(300.f, 600.f); 
+    }
 };
 
 

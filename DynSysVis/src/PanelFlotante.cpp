@@ -27,7 +27,7 @@ PanelFlotante::PanelFlotante(
 
 
     // ── cuerpo empieza con tamano default hasta que haya contenido
-    cuerpo.setSizeAbsoluto({ 200.f, 100.f });
+    cuerpo.setSizeAbsoluto({ 250.f, 350.f });
     recalcularPosCuerpo();
 
 
@@ -48,13 +48,11 @@ bool PanelFlotante::mouseEnHandle(sf::Vector2f mousePos) const {
         && mousePos.y >= pH.y && mousePos.y <= pH.y + sH.y;
 }
 
-// void PanelFlotante::recalcularTamanoCuerpo() {
-//     sf::Vector2f tam = contenido
-//         ? contenido->getSize()
-//         : sf::Vector2f{ 200.f, 100.f };
-//     cuerpo.setSizeAbsoluto(tam);
-//     recalcularPosCuerpo();  // posicion depende del tamaño del cuerpo
-// }
+void PanelFlotante::recalcularTamanoCuerpo() {
+    sf::Vector2f tam = (contenidoPtr) ? contenidoPtr->getSize() : sf::Vector2f(250.f, 350.f);
+    cuerpo.setSizeAbsoluto(tam);
+    recalcularPosCuerpo();  // posicion depende del tamaño del cuerpo
+}
 
 void PanelFlotante::recalcularPosCuerpo() {
     sf::Vector2f pH = handle.getPosition();
@@ -67,6 +65,15 @@ void PanelFlotante::recalcularPosCuerpo() {
         case DespliegueDir::Arriba: pos = { pH.x, pH.y - sC.y - ESPACIADO }; break;
         case DespliegueDir::Der:    pos = { pH.x + sH.x + ESPACIADO, pH.y }; break;
         case DespliegueDir::Izq:    pos = { pH.x - sC.x - ESPACIADO, pH.y }; break;
+        case DespliegueDir::AbajoIzq: 
+            // Alinea el borde derecho del cuerpo con el del handle
+            // pos.x = (X del handle + Ancho handle) - Ancho cuerpo
+            pos = { (pH.x + sH.x) - sC.x, pH.y + sH.y + ESPACIADO }; 
+            break;
+        case DespliegueDir::ArribaIzq: 
+            // Alinea el borde derecho del cuerpo con el del handle pero arriba
+            pos = { (pH.x + sH.x) - sC.x, pH.y - sC.y - ESPACIADO }; 
+            break;
     }
     cuerpo.setPosition(pos.x, pos.y);
 }
@@ -116,8 +123,35 @@ void PanelFlotante::gestionarEvento(const sf::Event& evento ){
     bool click = (evento.type == sf::Event::MouseButtonPressed && 
                   evento.mouseButton.button == sf::Mouse::Left);
 
-
+    //  Actualizar el estado del handle (hover y apertura)    
     update(mousePos, click);
+    
+    if( abierto && contenidoPtr ){
+        // Simplemente delegamos el evento completo
+        contenidoPtr->gestionarEvento(evento, window);
+    }
+
+    // // Pasar eventos al contenido (MenuFlotante) SOLO si está abierto
+    // if (abierto && contenidoPtr) {
+    //     // Obtenemos el origen del cuerpo para que el menú sepa dónde está dibujado
+    //     sf::Vector2f origenCuerpo = cuerpo.getPosition();
+
+    //     // Casteamos dinámicamente o asumimos que es un MenuFlotante
+    //     // Si quieres ser genérico, podrías añadir estos métodos a la clase Objeto
+    //     auto menu = dynamic_cast<MenuFlotante*>(contenidoPtr);
+        
+    //     if( menu){
+    //         if (evento.type == sf::Event::MouseMoved) {
+    //             menu->onMouseMove(mousePos, origenCuerpo);
+    //         }
+    //         else if (evento.type == sf::Event::MouseButtonPressed) {
+    //             menu->onMousePress(mousePos, origenCuerpo);
+    //         }
+    //         else if (evento.type == sf::Event::MouseButtonReleased) {
+    //             menu->onMouseRelease(mousePos, origenCuerpo);
+    //         }
+    //     }
+    // }
 
     ajustarOrientacionHandle();
 }
@@ -149,6 +183,10 @@ void PanelFlotante::update(sf::Vector2f mousePos, bool click) {
 
 void PanelFlotante::draw() {
 
+    // por si agregmaos bootnes o cosas entro del menu despeus de crear los obejtos
+    recalcularTamanoCuerpo();
+    recalcularPosCuerpo();
+
     // ── handle: siempre se dibuja ────────────────────────────────
      
     handle.setBorderWidth(enHover ? borde*2.0f :borde);
@@ -173,8 +211,8 @@ void PanelFlotante::setColorFondo(sf::Color color){
     cuerpo.setColorFondo(color);
 }    
 void PanelFlotante::setDegradado(sf::Color colorTop, sf::Color colorBot){
-    handle.setDegradado(colorTop,colorBot );
-    cuerpo.setDegradado(colorTop,colorBot );
+    handle.setDegradado(colorTop, colorBot );
+    cuerpo.setDegradado(colorTop, colorBot );
 }    
 void PanelFlotante::setBorderWidth(float grosor){
     handle.setBorderWidth(grosor);

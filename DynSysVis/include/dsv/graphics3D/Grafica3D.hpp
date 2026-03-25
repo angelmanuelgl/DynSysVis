@@ -48,7 +48,7 @@ public:
     // --- CONTROL Y RENDER ---
     // ============================================================
 
-    void gestionarEvento(const sf::Event& ev, const sf::RenderWindow& win ){ 
+    void gestionarEvento(const sf::Event& ev, const sf::RenderWindow& win ) override { 
         camara.gestionarEvento(ev, win);
     }
 
@@ -89,8 +89,9 @@ public:
 
     void draw(sf::RenderWindow& window, sf::RenderStates states, sf::Vector2f pSize) override {
 
-        // guardar el size y poscion de la camara
-        camara.actualizarBoundsGlobal(states, pSize);
+        // guardar el bound y pasarselo a la camara para que se gestione
+        actualizarBoundsGlobal(states, pSize);
+        camara.ultimoBoundsGlobal = this->ultimoBoundsGlobal;
 
         // dibujar ejes (si estan activos)
         dibujarEjes(window,states,pSize);

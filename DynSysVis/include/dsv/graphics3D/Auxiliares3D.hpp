@@ -103,12 +103,6 @@ public:
     // posicion
     sf::FloatRect ultimoBoundsGlobal; 
 
-    // actualizar (llamado externamente antes de gestionarEvento)
-    void actualizarBoundsGlobal(sf::RenderStates states, sf::Vector2f pSize) {
-        sf::Vector2f posGlobal = states.transform.transformPoint(0, 0);
-        this->ultimoBoundsGlobal = sf::FloatRect(posGlobal, pSize);
-    }
-
     // mouse
     sf::Vector2i ultimaPosMouse;
     bool estaRotando = false;

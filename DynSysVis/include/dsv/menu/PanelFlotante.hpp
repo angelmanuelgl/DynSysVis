@@ -13,7 +13,7 @@ namespace dsv{
 
 
 enum class HandleOrientacion { Horizontal, Vertical };
-enum class DespliegueDir     { Abajo, Arriba, Der, Izq };
+enum class DespliegueDir     { Abajo, Arriba, Der, Izq , AbajoIzq, ArribaIzq};
 
 class PanelFlotante {
 private:
@@ -28,14 +28,14 @@ private:
     // ── los dos paneles ─────────────────────────────────────────
     Panel handle;   // siempre visible
     Panel cuerpo;   // visible solo si abierto
-
+    Objeto* contenidoPtr = nullptr;   // no owning, el owner es cuerpo
     // ── tamanos fijos del handle según orientacion ──────────────
     // Horizontal: ancho generoso, alto compacto
     // Vertical:   ancho compacto, alto generoso
-    static constexpr float HANDLE_ANCHO_H = 260.f;
+    static constexpr float HANDLE_ANCHO_H = 150.f;
     static constexpr float HANDLE_ALTO_H  =  32.f;
     static constexpr float HANDLE_ANCHO_V =  32.f;
-    static constexpr float HANDLE_ALTO_V  = 260.f;
+    static constexpr float HANDLE_ALTO_V  = 150.f;
 
     static constexpr float ESPACIADO      =   6.f;
 
@@ -45,7 +45,7 @@ private:
 
     // ── helpers ─────────────────────────────────────────────────
     bool mouseEnHandle(sf::Vector2f mousePos) const;
-    // void recalcularTamanoCuerpo();
+    void recalcularTamanoCuerpo();
     void recalcularPosCuerpo();
     void ajustarOrientacionHandle();
 
@@ -67,7 +67,8 @@ public:
     template <typename T, typename... Args>
     T* crearContenido(Args&&... args) {
         T* ptr = cuerpo.crearContenido<T>(std::forward<Args>(args)...);
-        // recalcularTamanoCuerpo();
+        contenidoPtr = ptr;   // guardamos como Objeto* para poder llamar getSize()
+        recalcularTamanoCuerpo();
         recalcularPosCuerpo();
         return ptr;
     }

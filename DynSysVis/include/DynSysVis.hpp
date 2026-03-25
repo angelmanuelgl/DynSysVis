@@ -43,6 +43,9 @@
 
 // --- menu ---
 #include "dsv/menu/PanelFlotante.hpp"
+#include "dsv/menu/Campo.hpp"
+#include "dsv/menu/CampoControl.hpp"
+#include "dsv/menu/MenuFlotante.hpp"
 
 
 // --- Estilo ---

@@ -29,8 +29,8 @@ Panel::Panel(sf::RenderWindow& window_,  const std::string& tituloPanel, sf::Col
     window(window_), extColor(extColor) {   
     
     // asignar color en automatcio
-    bgColor=sf::Color(30,30,30);
-    
+    bgColor = sf::Color(30,30,30);
+    bgBotColor = bgColor;
     // poner fuente por defecto 
     yafuenteCargada = false;
     if( tituloPanel != "" ){
@@ -44,7 +44,7 @@ Panel::Panel(sf::RenderWindow& window_,  const std::string& tituloPanel, sf::Col
     setSize(2,2);
     setPosition(0,0);
 
-    elMarco.generar(size, radio, bgColor, extColor);
+    elMarco.generar(size, radio, bgColor, bgBotColor, extColor, borde);
 
     // tecnicamente con llamar al consturctor no basta hay que llamar a 
     // sizeEnRejilla  y positionEnRejilla para que funcione
@@ -93,12 +93,12 @@ void Panel::setSize(double nx, double ny){
     float y = (disponibleY - huecosY) / ny;
     
     size = {x, y};
-    elMarco.generar(size, radio, bgColor, extColor);
+    elMarco.generar(size, radio, bgColor, bgBotColor, extColor, borde);
 }
 
 void Panel::setSizeAbsoluto(sf::Vector2f tamano) {
     size = tamano;
-    elMarco.generar(size, radio, bgColor, extColor);
+    elMarco.generar(size, radio, bgColor, bgBotColor, extColor, borde);
 }
 
 void Panel::setPosition(float x, float y) {
@@ -191,7 +191,7 @@ void Panel::aplicarRecorte(const sf::RenderWindow& window, sf::Vector2f pos, sf:
 
 
 void Panel::draw(void) {
-  
+    
     // dibujar el marco al final
     elMarco.draw(window, mytransform); 
     

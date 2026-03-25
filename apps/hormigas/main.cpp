@@ -30,7 +30,7 @@ int main( ){
     dsv::Sistema::inicializarVentana(window, "DynSysVis RT - Colonia de Hormigas");
 
 
-
+    
     // --- paneles flotantes ----
     dsv::PanelFlotante miPanel(
         window, 
@@ -39,7 +39,7 @@ int main( ){
         dsv::DespliegueDir::Abajo,
         sf::Color::Cyan         
     );
-    miPanel.setDegradado( sf::Color(30,60,40,200),  sf::Color(20,20,25, 200) ); 
+    miPanel.setDegradado( sf::Color(30,60,40,240),  sf::Color(255,20,25, 240) ); 
     miPanel.positionAbsoluta( dsv::Ubicacion::ArribaIzq );
 
     dsv::PanelFlotante miPanel2(
@@ -49,17 +49,17 @@ int main( ){
         dsv::DespliegueDir::Abajo,
         dsv::Color::rojo          
     );
-    miPanel2.setDegradado( sf::Color(60,30,40,200),  sf::Color(20,20,25, 200) ); 
+    miPanel2.setDegradado( sf::Color(60,30,40,240),  sf::Color(20,20,25, 240) ); 
     miPanel2.positionAbsoluta( dsv::Ubicacion::ArribaCentro );
 
     dsv::PanelFlotante miPanel3(
         window, 
         "otro", 
         dsv::HandleOrientacion::Horizontal,
-        dsv::DespliegueDir::Abajo,
+        dsv::DespliegueDir::AbajoIzq,
         dsv::Color::azul_noche      
     );
-    miPanel3.setDegradado( sf::Color(50,30,40,200),  sf::Color(20,20,25, 200) ); 
+    miPanel3.setDegradado( sf::Color(50,50,60,240),  sf::Color(20,20,25, 240) ); 
     miPanel3.positionAbsoluta( dsv::Ubicacion::ArribaDer );
 
     
@@ -70,7 +70,7 @@ int main( ){
         dsv::DespliegueDir::Der,
         dsv::Color::morado      
     );
-    miPanel4.setDegradado( sf::Color(50,30,60,200),  sf::Color(20,20,25, 200) ); 
+    miPanel4.setDegradado( sf::Color(50,30,60,240),  sf::Color(20,20,25, 240) ); 
     miPanel4.positionAbsoluta( dsv::Ubicacion::CentroIzq );
 
     
@@ -81,8 +81,69 @@ int main( ){
         dsv::DespliegueDir::Izq,
         dsv::Color::naranja      
     );
-    miPanel5.setDegradado( sf::Color(45,60,40,200),  sf::Color(20,20,25, 200) ); 
+    miPanel5.setDegradado( sf::Color(65,60,40,240),  sf::Color(20,20,25, 240) ); 
     miPanel5.positionAbsoluta( dsv::Ubicacion::CentroDer );
+
+
+    dsv::PanelFlotante miPanel6(
+        window, 
+        "Menu Opciones", 
+        dsv::HandleOrientacion::Horizontal,
+        dsv::DespliegueDir::Arriba,
+        sf::Color::Cyan         
+    );
+    miPanel6.setDegradado( sf::Color(30,60,40,240),  sf::Color(20,20,25, 240) ); 
+    miPanel6.positionAbsoluta( dsv::Ubicacion::AbajoIzq );
+
+    dsv::PanelFlotante miPanel7(
+        window, 
+        "Menu Tiempo", 
+        dsv::HandleOrientacion::Horizontal,
+        dsv::DespliegueDir::Arriba,
+        dsv::Color::rojo          
+    );
+    miPanel7.setDegradado( sf::Color(60,30,40,240),  sf::Color(20,20,25, 240) ); 
+    miPanel7.positionAbsoluta( dsv::Ubicacion::AbajoCentro );
+
+    dsv::PanelFlotante miPanel8(
+        window, 
+        "otro", 
+        dsv::HandleOrientacion::Horizontal,
+        dsv::DespliegueDir::ArribaIzq,
+        dsv::Color::azul_noche      
+    );
+    miPanel8.setDegradado( sf::Color(50,50,60,240),  sf::Color(20,20,25, 240) ); 
+    miPanel8.positionAbsoluta( dsv::Ubicacion::AbajoDer );
+
+    
+    
+
+    // prueba
+    float fps, tiempo=2.0f, energia, velocidad;
+    bool pausado;
+    auto* menu = miPanel4.crearContenido<MenuFlotante>(6.f, 12.f);
+
+    auto& fila1 = menu->agregarFila();
+    fila1.agregar<dsv::CampoTexto>("Sistema dinamico");
+
+    auto& fila2 = menu->agregarFila();
+    fila2.agregar<dsv::CampoVariable>("fps",      &fps);
+    fila2.agregar<dsv::CampoVariable>("tiempo",   &tiempo);
+
+    auto& fila3 = menu->agregarFila();
+    fila3.agregar<dsv::CampoBarra>("energia ", &energia, 0.f, 1.f, sf::Color(80,240,100));
+
+    auto& fila4 = menu->agregarFila();
+    fila4.agregar<dsv::CampoDeslizador>("velocidad ", &velocidad, 0.f, 10.f);
+
+    auto& fila5 = menu->agregarFila();
+    fila5.agregar<dsv::CampoToggleTexto>("", &pausado, "Pausa", "Play");
+    fila5.agregar<dsv::CampoToggle>("pausa", &pausado);
+
+    auto& fila6 = menu->agregarFila();
+    fila6.agregar<dsv::CampoBoton>("Reset", [&]{ velocidad = 0.f; });
+
+
 
 
     // --- tablero con datos --- DSV
@@ -168,6 +229,9 @@ int main( ){
             miPanel3.gestionarEvento(event);
             miPanel4.gestionarEvento(event);
             miPanel5.gestionarEvento(event);
+            miPanel6.gestionarEvento(event);
+            miPanel7.gestionarEvento(event);
+            miPanel8.gestionarEvento(event);
         }
 
         // --- --- --- ---  Simulacion --- --- --- --- 
@@ -217,6 +281,9 @@ int main( ){
         miPanel3.draw();
         miPanel4.draw();
         miPanel5.draw();
+        miPanel6.draw();
+        miPanel7.draw();
+        miPanel8.draw();
         window.display();
     }
 
