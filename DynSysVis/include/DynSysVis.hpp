@@ -54,8 +54,15 @@
 // --- Simulacion Matematicas ---
 #include "dsv/simulation/Integradores.hpp"
 
-#include "dsv/simulation/Lorenz.hpp"
-#include "dsv/simulation/ORG.hpp"
-#include "dsv/simulation/SIR.hpp"
+#include "dsv/simulation/Modelo.hpp"
 
+
+// --- modelos ---
+#include "dsv/Modelos/Attractors.hpp"
+#include "dsv/Modelos/Ecology.hpp"
+#include "dsv/Modelos/Epidemiologicos.hpp"
+#include "dsv/Modelos/Finanzas.hpp"
+#include "dsv/Modelos/FisicaEstadistica.hpp"
+#include "dsv/Modelos/GrowthModels.hpp"
+#include "dsv/Modelos/Mechanics.hpp"
 #endif

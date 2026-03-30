@@ -19,6 +19,45 @@
 using namespace dsv;
 
 
+struct AntColony_Model {
+    static constexpr size_t dim       = 3;
+    static constexpr size_t noise_dim = 0;
+
+    // Parámetros del modelo (con tus valores por defecto)
+    float bO      = 0.05f;
+    float betaOG  = 4.0f;
+    float betaGR  = 2.5f;
+    float betaRG  = 1.2f;
+    float kG      = 50.0f;
+    float kR      = 50.0f;
+    float dG      = 0.005f;
+    float dR      = 0.005f;
+
+    enum { O, G, R }; // Mapeo de índices
+
+    void drift(const std::array<float, dim>& x,
+               float /*t*/,
+               std::array<float, dim>& out) const 
+    {
+        // x[O] = Obreras, x[G] = Guerreras, x[R] = Recolectoras
+        
+        // dO/dt = bO*O - (betaOG / (kG + G))*O
+        out[O] = (bO * x[O]) - (betaOG / (kG + x[G])) * x[O];
+
+        // dR/dt = (betaGR / (kR + R)) * G - (betaRG / (kG + G)) * R - (dR * R)
+        out[R] = (betaGR / (kR + x[R])) * x[G] 
+                 - (betaRG / (kG + x[G])) * x[R] 
+                 - (dR * x[R]);
+                 
+        // dG/dt = (betaOG / (kG + G)) * O - (betaGR / (kR + R)) * G - (dG * G) + (betaRG / (kG + G)) * R
+        out[G] = (betaOG / (kG + x[G])) * x[O] 
+                 - (betaGR / (kR + x[R])) * x[G] 
+                 - (dG * x[G]) 
+                 + (betaRG / (kG + x[G])) * x[R];
+
+        
+    }
+};
 
 
 int main( ){
@@ -30,260 +69,251 @@ int main( ){
     dsv::Sistema::inicializarVentana(window, "DynSysVis RT - Colonia de Hormigas");
 
 
+
+    // --- --- --- --- --- --- --- -- --- --- --- --- --- --- ---
+    // --- --- --- --- --- --- MODELO --- --- --- --- --- --- ---
+    // --- --- --- --- --- --- --- -- --- --- --- --- --- --- ---
+
+    // --- INSTANCIA DEL MODELO ---
+    // using Ants = dsv::mod::AntColony_Model;
+    using Ants = AntColony_Model;
+    dsv::mod::Instance<Ants> hormigas;
     
-    // --- paneles flotantes ----
-    dsv::PanelFlotante miPanel(
-        window, 
-        "Menu Opciones", 
-        dsv::HandleOrientacion::Horizontal,
-        dsv::DespliegueDir::Abajo,
-        sf::Color::Cyan         
-    );
-    miPanel.setDegradado( sf::Color(30,60,40,240),  sf::Color(255,20,25, 240) ); 
-    miPanel.positionAbsoluta( dsv::Ubicacion::ArribaIzq );
+    // Condiciones iniciales
+    hormigas.state[Ants::O] = 60.0f;
+    hormigas.state[Ants::G] = 20.0f;
+    hormigas.state[Ants::R] = 10.0f;
 
-    dsv::PanelFlotante miPanel2(
-        window, 
-        "Menu Tiempo", 
-        dsv::HandleOrientacion::Horizontal,
-        dsv::DespliegueDir::Abajo,
-        dsv::Color::rojo          
-    );
-    miPanel2.setDegradado( sf::Color(60,30,40,240),  sf::Color(20,20,25, 240) ); 
-    miPanel2.positionAbsoluta( dsv::Ubicacion::ArribaCentro );
+    // Referencia corta al modelo para los menús
+    auto& m = hormigas.getModel();
 
-    dsv::PanelFlotante miPanel3(
-        window, 
-        "otro", 
-        dsv::HandleOrientacion::Horizontal,
-        dsv::DespliegueDir::AbajoIzq,
-        dsv::Color::azul_noche      
-    );
-    miPanel3.setDegradado( sf::Color(50,50,60,240),  sf::Color(20,20,25, 240) ); 
-    miPanel3.positionAbsoluta( dsv::Ubicacion::ArribaDer );
-
-    
-    dsv::PanelFlotante miPanel4(
+    // --- MENU PARA AJUSTAR MODELO (VINCULADO A LA INSTANCIA) ---
+    // PANEL
+    dsv::PanelFlotante PanelMenuHormigas(
         window, 
         "info", 
         dsv::HandleOrientacion::Vertical,
         dsv::DespliegueDir::Der,
         dsv::Color::morado      
     );
-    miPanel4.setDegradado( sf::Color(50,30,60,240),  sf::Color(20,20,25, 240) ); 
-    miPanel4.positionAbsoluta( dsv::Ubicacion::CentroIzq );
-
-    
-    dsv::PanelFlotante miPanel5(
-        window, 
-        "grafica", 
-        dsv::HandleOrientacion::Vertical,
-        dsv::DespliegueDir::Izq,
-        dsv::Color::naranja      
-    );
-    miPanel5.setDegradado( sf::Color(65,60,40,240),  sf::Color(20,20,25, 240) ); 
-    miPanel5.positionAbsoluta( dsv::Ubicacion::CentroDer );
-
-
-    dsv::PanelFlotante miPanel6(
-        window, 
-        "Menu Opciones", 
-        dsv::HandleOrientacion::Horizontal,
-        dsv::DespliegueDir::Arriba,
-        sf::Color::Cyan         
-    );
-    miPanel6.setDegradado( sf::Color(30,60,40,240),  sf::Color(20,20,25, 240) ); 
-    miPanel6.positionAbsoluta( dsv::Ubicacion::AbajoIzq );
-
-    dsv::PanelFlotante miPanel7(
-        window, 
-        "Menu Tiempo", 
-        dsv::HandleOrientacion::Horizontal,
-        dsv::DespliegueDir::Arriba,
-        dsv::Color::rojo          
-    );
-    miPanel7.setDegradado( sf::Color(60,30,40,240),  sf::Color(20,20,25, 240) ); 
-    miPanel7.positionAbsoluta( dsv::Ubicacion::AbajoCentro );
-
-    dsv::PanelFlotante miPanel8(
-        window, 
-        "otro", 
-        dsv::HandleOrientacion::Horizontal,
-        dsv::DespliegueDir::ArribaIzq,
-        dsv::Color::azul_noche      
-    );
-    miPanel8.setDegradado( sf::Color(50,50,60,240),  sf::Color(20,20,25, 240) ); 
-    miPanel8.positionAbsoluta( dsv::Ubicacion::AbajoDer );
-
+    PanelMenuHormigas.setDegradado( sf::Color(50,30,60,240),  sf::Color(20,20,25, 240) ); 
+    PanelMenuHormigas.positionAbsoluta( dsv::Ubicacion::CentroIzq );
     
     
+    // MENU
+    MenuFlotante* menuHormigas = PanelMenuHormigas.crearContenido<MenuFlotante>(6.f, 12.f);
 
-    // prueba
-    float fps, tiempo=2.0f, energia, velocidad;
-    bool pausado;
-    auto* menu = miPanel4.crearContenido<MenuFlotante>(6.f, 12.f);
+    // --- contenido --- 
+    // obreras
+    CampoControl& mH_fila1 = menuHormigas->agregarFila();
+    mH_fila1.agregar<dsv::CampoBarra>("Obreras ", &hormigas.state[Ants::O], 0.f, 500.f, sf::Color(80,240,100));
+    
+    CampoControl& mH_fila2 = menuHormigas->agregarFila();
+    mH_fila2.agregar<dsv::CampoDeslizador>("Nacimiento Obreras ", &m.bO, 0.0f, 1.0f);
 
-    auto& fila1 = menu->agregarFila();
-    fila1.agregar<dsv::CampoTexto>("Sistema dinamico");
+    // Recolectoras
+    CampoControl& mH_fila3 = menuHormigas->agregarFila();
+    mH_fila3.agregar<dsv::CampoBarra>("Recolectoras ", &hormigas.state[Ants::R], 0.f, 500.f, dsv::Color::oro);
+    
+    CampoControl& mH_fila4 = menuHormigas->agregarFila();
+    mH_fila4.agregar<dsv::CampoDeslizador>("Muerte Recolectoras ", &m.dR, 0.0f, 1.0f);
 
-    auto& fila2 = menu->agregarFila();
-    fila2.agregar<dsv::CampoVariable>("fps",      &fps);
-    fila2.agregar<dsv::CampoVariable>("tiempo",   &tiempo);
-
-    auto& fila3 = menu->agregarFila();
-    fila3.agregar<dsv::CampoBarra>("energia ", &energia, 0.f, 1.f, sf::Color(80,240,100));
-
-    auto& fila4 = menu->agregarFila();
-    fila4.agregar<dsv::CampoDeslizador>("velocidad ", &velocidad, 0.f, 10.f);
-
-    auto& fila5 = menu->agregarFila();
-    fila5.agregar<dsv::CampoToggleTexto>("", &pausado, "Pausa", "Play");
-    fila5.agregar<dsv::CampoToggle>("pausa", &pausado);
-
-    auto& fila6 = menu->agregarFila();
-    fila6.agregar<dsv::CampoBoton>("Reset", [&]{ velocidad = 0.f; });
-
+    // Guerreras
+    CampoControl& mH_fila5 = menuHormigas->agregarFila();
+    mH_fila5.agregar<dsv::CampoBarra>("Guerreras ", &hormigas.state[Ants::G], 0.f, 500.f, dsv::Color::rojo);
+    
+    CampoControl& mH_fila6 = menuHormigas->agregarFila();
+    mH_fila6.agregar<dsv::CampoDeslizador>("Muerte Guerreras ", &m.dG, 0.0f, 1.0f);
 
 
-
+   
+    // --- --- --- --- --- --- --- -- --- --- --- --- --- --- ---
+    // --- --- --- --- --- --- PANELES --- --- --- --- --- --- --
+    // --- --- --- --- --- --- --- -- --- --- --- --- --- --- ---
+    
     // --- tablero con datos --- DSV
     dsv::Layout miLayout = {
-        "fa1 .   tri tri g g",
-        "fa2 fa3 .   .   o o",
-        "cir cir .   .   r r",
-        "cir cir .   .   t t"
+        "fa1 .   . o o o",
+        "fa2 fa3 . r r r",
+        "cir cir . g g g",
+        "cir cir all all t t"
     };
     dsv::Tablero tablero(window, miLayout);
 
-    // --- parametros para simular lo de hormigas ---
-    float O = 60.0f;
-    float G = 20.0f;
-    float R = 10.0f;
-    float t = 0;
-
-    const float bO = 0.05f;
-    const float betaOG = 4.0f;
-    const float betaGR = 2.5f;
-    const float betaRG = 1.2f;
-    const float kG = 50.0f;
-    const float kR = 50.0f;
-    const float dG = 0.005f;
-    const float dR = 0.005f;
-
-   
-    // / /  --- ---  PANELES --- ---  DSV  / / //
-
     /// GraficaTiempo
-    auto guerreras    = tablero.add<dsv::GraficaTiempo>("guerreras", dsv::Color::rojo, "g", dsv::Color::rojo);
-    // guerreras -> agregarSerie("serie1", dsv::Color::rojo);
-    auto recolectoras = tablero.add<dsv::GraficaTiempo>("recolectoras", dsv::Color::oro, "r", dsv::Color::oro);
-    auto obreras      = tablero.add<dsv::GraficaTiempo>("obreras", dsv::Color::verde, "o", dsv::Color::verde);
-    auto total = tablero.add<dsv::GraficaTiempo>("Poblaciones Totalde la totaldiad toal de hormigas totales e", dsv::Color::celeste, "t" );
+    Vista<GraficaTiempo> obreras      = tablero.add<dsv::GraficaTiempo>("obreras", dsv::Color::verde, "o", dsv::Color::verde);
+    Vista<GraficaTiempo> guerreras    = tablero.add<dsv::GraficaTiempo>("guerreras", dsv::Color::rojo, "g", dsv::Color::rojo);
+    Vista<GraficaTiempo> recolectoras = tablero.add<dsv::GraficaTiempo>("recolectoras", dsv::Color::oro, "r", dsv::Color::oro);
+    
+    Vista<GraficaTiempo> total = tablero.add<dsv::GraficaTiempo>("Poblaciones Totalde la totaldiad toal de hormigas totales e", dsv::Color::celeste, "t" );
 
     /// EspacioFase2D
-    auto OG = tablero.add<dsv::EspacioFase2D>("Espacio Fase (O, G)", dsv::Color::azul, "fa1", dsv::Color::azul );
-    auto OR = tablero.add<dsv::EspacioFase2D>("Espacio Fase (O, R)", dsv::Color::aqua, "fa2",   dsv::Color::aqua );
-    auto RG = tablero.add<dsv::EspacioFase2D>("Espacio Fase (R, G)", dsv::Color::cian, "fa3",   dsv::Color::cian );
+    Vista<EspacioFase2D> OG = tablero.add<dsv::EspacioFase2D>("Espacio Fase (O, G)", dsv::Color::azul, "fa1", dsv::Color::azul );
+    Vista<EspacioFase2D> OR = tablero.add<dsv::EspacioFase2D>("Espacio Fase (O, R)", dsv::Color::aqua, "fa2",   dsv::Color::aqua );
+    Vista<EspacioFase2D> RG = tablero.add<dsv::EspacioFase2D>("Espacio Fase (R, G)", dsv::Color::cian, "fa3",   dsv::Color::cian );
 
     /// GraficoCircular
-    auto pie = tablero.add<dsv::GraficoCircular>("Poblacion de Hormigas", dsv::Color::aqua, "cir");
+    Vista<GraficoCircular> pie = tablero.add<dsv::GraficoCircular>("Poblacion de Hormigas", dsv::Color::aqua, "cir");
 
-    pie -> personalizarColores( { dsv::Color::rojo, dsv::Color::oro, dsv::Color::verde } );
+    pie -> personalizarColores( { dsv::Color::verde ,  dsv::Color::oro , dsv::Color::rojo} );
 
     /// GraficaTiempo // tambien admite multiserie
-    auto triple = tablero.add<dsv::GraficaTiempo>("Poblaciones de Hormigas", dsv::Color::celeste, "tri" );
+    Vista<GraficaTiempo> triple = tablero.add<dsv::GraficaTiempo>("Poblaciones de Hormigas", dsv::Color::celeste, "all" );
 
-    triple -> agregarSerie("guerreras"   , dsv::Color::rojo);
     triple -> agregarSerie("recolectoras", dsv::Color::oro);
     triple -> agregarSerie("obreras"     , dsv::Color::verde);
+    triple -> agregarSerie("guerreras"   , dsv::Color::rojo);
 
+    obreras.objeto.configurarMaxLim(40); // 40s
+    guerreras.objeto.configurarMaxLim(40); // 40s
+    recolectoras.objeto.configurarMaxLim(40); // 40s
+    triple.objeto.configurarMaxLim(40); // 40s
+
+
+    // --- --- --- --- --- --- --- -- --- --- --- --- --- --- ---
+    // --- --- --- --- --- --- MENU DE TIEMPO --- --- --- --- ---
+    // --- --- --- --- --- --- --- -- --- --- --- --- --- --- ---
+    // eventos
+    bool pausa = true;           
+    float timeScale = 1.0f;       
+    // fps e info
+    sf::Clock fpsClock;        
+    long long frameCount = 0;
+    float fps = 0;
+    float tiempo=0.0f;
     
-    /// acceder a metodos especificos de los objetos de los paneles
-    // OG -> configurarMaxPoints(5000);
-    // OR -> configurarMaxPoints(5000);  
-    // RG -> configurarMaxPoints(5000);
+    // PANEL
+    sf::Color colorMENU = dsv::Color::naranja;
+    sf::Color colorMenu = dsv::Color::oro;
+    dsv::PanelFlotante PanelMenuTiempo(
+        window, 
+        "Menu Tiempo", 
+        dsv::HandleOrientacion::Horizontal,
+        dsv::DespliegueDir::Abajo,
+        colorMENU          
+    );
+    PanelMenuTiempo.setDegradado( sf::Color(60,60,40,240),   sf::Color(40,40,30,220) ); 
+    PanelMenuTiempo.positionAbsoluta( dsv::Ubicacion::ArribaCentro );
+    
 
-    // --- --- --- ---  Control del tiempo --- --- --- --- 
-    //  (Paso fijo de 0.1s)
+    // MENU
+    MenuFlotante* menu = PanelMenuTiempo.crearContenido<MenuFlotante>(6.f, 12.f);
+
+    // COTENIDO
+    CampoControl& menu_fila1 = menu->agregarFila();
+    menu_fila1.agregar<dsv::CampoTexto>(" - - - - - CONTROLADOR - - - - - ");
+
+    CampoControl& menu_fila2 = menu->agregarFila();
+    menu_fila2.agregar<dsv::CampoVariable>("fps",      &fps);
+    menu_fila2.agregar<dsv::CampoVariable>("tiempo",   &tiempo);
+
+    CampoControl& menu_fila3 = menu->agregarFila();
+    menu_fila3.agregar<dsv::CampoBoton>("<<", [&]{ timeScale = std::max(0.1f, timeScale - 0.1f); },  colorMENU);
+    menu_fila3.agregar<dsv::CampoToggleTexto>("", &pausa, "Pausa", "Play", colorMENU);
+    menu_fila3.agregar<dsv::CampoBoton>(">>", [&]{ timeScale += 0.1f; }, colorMENU);
+
+    CampoControl& menu_fila4 = menu->agregarFila();
+    menu_fila4.agregar<dsv::CampoVariable>("Velocidad:  x",    &timeScale);
+
+    CampoControl& menu_fila5 = menu->agregarFila();
+    menu_fila5.agregar<dsv::CampoBoton>("Reset", [&]{  });
+    menu_fila5.agregar<dsv::CampoToggle>("Pausa", &pausa,  colorMENU);
+
+
+
+    // --- --- --- --- --- --- --- -- --- --- --- --- --- --- ---
+    // --- --- --- --- --- --- SIMULACION --- --- --- --- --- ---
+    // --- --- --- --- --- --- --- -- --- --- --- --- --- --- ---
+
+    // --- --- --- CONTROL TIEMPO --- --- ---
     sf::Clock clock;
     sf::Time accumulator = sf::Time::Zero;
     sf::Time ups = sf::seconds(0.005f); // Update por segundo
-    bool iniciado = false;
-    // ups = sf::seconds(0.5f); // Update por segundo
-
+    
    
     while( window.isOpen() ){
-        // --- --- --- ---  eventos --- --- --- --- 
+        // --- --- --- ---  ECVENTOS --- --- --- --- 
         sf::Event event;
         while( window.pollEvent(event) ){
             if( event.type == sf::Event::Closed) window.close();
 
-            if( event.type == sf::Event::KeyPressed && !iniciado){
-                clock.restart(); 
-                accumulator = sf::Time::Zero;
-                iniciado = true;
-            }
+            PanelMenuTiempo.gestionarEvento(event);
+            PanelMenuHormigas.gestionarEvento(event);
 
-            miPanel.gestionarEvento(event);
-            miPanel2.gestionarEvento(event);
-            miPanel3.gestionarEvento(event);
-            miPanel4.gestionarEvento(event);
-            miPanel5.gestionarEvento(event);
-            miPanel6.gestionarEvento(event);
-            miPanel7.gestionarEvento(event);
-            miPanel8.gestionarEvento(event);
+
+            // extra
+            if( event.type == sf::Event::KeyPressed ){ 
+                if( event.key.code == sf::Keyboard::Space ){ 
+                    pausa = !pausa; 
+                }
+                if( event.key.code == sf::Keyboard::Up ){ 
+                    timeScale += 0.2f; // Acelerar
+                }
+                if( event.key.code == sf::Keyboard::Down ){ 
+                    timeScale = std::max(0.1f, timeScale - 0.2f); // Desacelerar (mínimo 0.1)
+                }
+            }
         }
 
-        // --- --- --- ---  Simulacion --- --- --- --- 
-        accumulator += clock.restart();
-        while( accumulator >= ups && iniciado ){
-            // --- Ec dif del MODELO NO LINEAL ---
-            
-            // dO/dt = bO*O - (betaOG / (kG + G))*O
-            float dO = (bO * O) - (betaOG / (kG + G)) * O;   
-            // dG/dt
-            float dG_dt = (betaOG / (kG + G)) * O - (betaGR / (kR + R)) * G - (dG * G) + (betaRG / (kG + G)) * R;  
-            // dR/dt
-            float dR_dt = (betaGR / (kR + R)) * G - (betaRG / (kG + G)) * R - (dR * R);
+        // --- --- --- ---  SOMULACION --- --- --- --- 
+        sf::Time elapsed = clock.restart();
 
+        //  Si no está pausado, lo sumamos al acumulador afectado por la escala
+        if( !pausa  ){ 
+            accumulator += elapsed * timeScale;
+        }
 
-            // actualiza variables con metodo de Euler
+        while( accumulator >= ups  ){
+            // --- --- --- --- ACTUALIZAR MODELO --- --- --- ---
             float dt = ups.asSeconds();
-            O += dO * dt;
-            G += dG_dt * dt;
-            R += dR_dt * dt;
-            t += dt;
-           
-            // agregar datos a graficas
-            guerreras -> push_back(G, t, "serie1");
-            recolectoras -> push_back(R, t);
-            obreras -> push_back(O, t);
-            total -> push_back(O+G+R, t);
+            
+            // ¡Aquí usamos el integrador oficial de la librería!
+            // Puedes cambiar a sim::E_step si prefieres Euler, pero RK4 es más estable.
+            dsv::sim::step(hormigas, dt);
 
-            triple -> push_back(O, t, "obreras");
-            triple -> push_back(G, t, "guerreras");
-            triple -> push_back(R, t, "recolectoras");
-
-            OG -> push_back(O,G);
-            OR -> push_back(O,R);
-            RG -> push_back(R,G);
-
-            pie -> push_back( {O, G, R} );
-
+            tiempo = hormigas.t;  // muestra
             accumulator -= ups;
         }
+
+        // --- --- agregar datos a graficas --- --- 
+        if( !pausa ){
+            float O_val = hormigas.state[Ants::O];
+            float G_val = hormigas.state[Ants::G];
+            float R_val = hormigas.state[Ants::R];
+            float t_val = hormigas.t;
+
+            obreras->push_back(O_val, t_val);
+            guerreras->push_back(G_val, t_val);
+            recolectoras->push_back(R_val, t_val);
+            total->push_back(O_val + G_val + R_val, t_val);
+
+            triple->push_back(O_val, t_val, "obreras");
+            triple->push_back(G_val, t_val, "guerreras");
+            triple->push_back(R_val, t_val, "recolectoras");
+
+            OG->push_back(O_val, G_val);
+            OR->push_back(O_val, R_val);
+            RG->push_back(R_val, G_val);
+
+            pie->push_back({O_val, G_val, R_val});
+        }
+
+        // --- --- --- --- --- calcular FPS --- --- --- --- --- 
+        frameCount++;
+        if( fpsClock.getElapsedTime().asSeconds() >= 1.0f ){ 
+            fps = frameCount;
+            frameCount = 0;
+            fpsClock.restart();
+        }
+
+
         // --- --- --- ---  Renderizado --- --- --- --- 
         // paneles de layout
         tablero.draw();
         // paneles flotantes
-        miPanel.draw();
-        miPanel2.draw();
-        miPanel3.draw();
-        miPanel4.draw();
-        miPanel5.draw();
-        miPanel6.draw();
-        miPanel7.draw();
-        miPanel8.draw();
+        PanelMenuTiempo.draw();
+        PanelMenuHormigas.draw();
+        
         window.display();
     }
 

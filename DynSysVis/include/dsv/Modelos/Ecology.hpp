@@ -1,0 +1,159 @@
+#ifndef ECOLOGY_HPP
+#define ECOLOGY_HPP
+
+#include <array>
+#include <cstddef>
+
+// Sistema de dos ODEs acopladas no lineales.
+//
+// ADVERTENCIA SOBRE INTEGRADORES:
+//   El sistema conserva la cantidad de Lyapunov V(x,y) = delta*x - gamma*ln(x)
+//                                                       + beta*y  - alpha*ln(y)
+//   Euler (E_step) destruye esta conservación: la espiral se abre o se cierra
+//   artificialmente. Para órbitas cerradas estables usar RK4_step.
+
+namespace dsv {
+namespace mod {
+
+
+// ──────────────────────────────────────────────────────────────────────────────
+// WrightFisher — Difusión Genética (Deriva Génica)
+//
+//   dx = β(x) dt + √(x(1-x)/N) dW
+//
+// Modela la frecuencia x ∈ [0,1] de un alelo en una población de tamaño N.
+// La difusión √(x(1-x)/N) viene de la varianza binomial de muestreo:
+//   - Se anula en los bordes x=0 y x=1 (estados absorbentes: fijación o extinción).
+//   - Es máxima en x=0.5.
+//
+// β(x): presión de selección o mutación. Aquí β=0 → deriva pura.
+//   β > 0: selección positiva del alelo
+//   β < 0: selección negativa
+//
+// Parámetro   Fenómeno
+//   N         Tamaño efectivo de la población (N pequeño → ruido genético fuerte)
+//   beta      Presión de selección lineal: β(x) = s·x·(1-x) es la elección canónica
+// ──────────────────────────────────────────────────────────────────────────────
+struct WrightFisher_Model {
+
+    static constexpr size_t dim       = 1;
+    static constexpr size_t noise_dim = 1;
+
+    float N    = 200.0f; // tamaño efectivo de la población (N > 0)
+    float beta = 0.0f;   // presión de selección/mutación (0 = deriva pura)
+
+    void drift(const std::array<float, dim>& x,
+               float /*t*/,
+               std::array<float, dim>& out) const
+    {
+        out[0] = beta * x[0] * (1.0f - x[0]); // selección; 0 si beta=0
+    }
+
+    void diffusion(const std::array<float, dim>& x,
+                   float /*t*/,
+                   std::array<float, dim>& out) const
+    {
+        // Clampeado en 0 para evitar sqrt de negativo por error numérico
+        float p = std::max(0.0f, std::min(1.0f, x[0]));
+        out[0] = std::sqrt(p * (1.0f - p) / N);
+    }
+};
+
+
+// ──────────────────────────────────────────────────────────────────────────────
+// LotkaVolterra — Depredador-Presa
+//
+//   dx1/dt = x1 * (alpha - beta  * x2)   <- presas
+//   dx2/dt = x2 * (delta * x1   - gamma) <- depredadores
+//
+// Punto de equilibrio: (x1*, x2*) = (gamma/delta, alpha/beta)
+// Con condición inicial distinta del equilibrio → órbitas cerradas periódicas.
+// ──────────────────────────────────────────────────────────────────────────────
+struct LotkaVolterra_Model {
+
+    static constexpr size_t dim       = 2;
+    static constexpr size_t noise_dim = 0;
+
+    // Parámetros ecológicos (todos positivos)
+    float alpha = 1.1f; // tasa de nacimiento de presas
+    float beta  = 0.4f; // éxito de caza (encuentros presa-depredador)
+    float delta = 0.1f; // eficiencia alimenticia del depredador
+    float gamma = 0.4f; // tasa de muerte natural del depredador
+
+    enum { PRESA, DEPREDADOR };
+
+    void drift(const std::array<float, dim>& x,
+               float /*t*/,
+               std::array<float, dim>& out) const
+    {
+        out[PRESA]      = x[PRESA]      * (alpha - beta  * x[DEPREDADOR]);
+        out[DEPREDADOR] = x[DEPREDADOR] * (delta * x[PRESA] - gamma);
+    }
+};
+
+
+
+// ──────────────────────────────────────────────────────────────────────────────
+// StochasticLotkaVolterra — Depredador-Presa con Ruido Ambiental
+//
+//   dx1 = x1·(α - β·x2) dt + σ1·x1 dW1     <- presas
+//   dx2 = x2·(δ·x1 - γ) dt + σ2·x2 dW2     <- depredadores
+//
+// El ruido modela variaciones ambientales (clima, disponibilidad de alimento)
+// que afectan las tasas de natalidad/mortalidad de cada especie de forma
+// independiente. Cada especie tiene su propio proceso de Wiener.
+//
+// La difusión es diagonal en la matriz B (d×m con d=m=2):
+//
+//   B = | σ1·x1    0    |
+//       |  0    σ2·x2  |
+//
+// El ruido multiplicativo xi·dWi asegura que si xi→0, el ruido también → 0:
+// una especie extinta no puede recuperarse por fluctuación.
+//
+// Parámetro   Fenómeno
+//   alpha     tasa de natalidad de presas
+//   beta      tasa de depredación (encuentros letales)
+//   delta     eficiencia de conversión presa→depredador
+//   gamma     tasa de mortalidad natural del depredador
+//   sigma1    intensidad de ruido ambiental en presas
+//   sigma2    intensidad de ruido ambiental en depredadores
+// ──────────────────────────────────────────────────────────────────────────────
+struct StochasticLotkaVolterra_Model {
+
+    static constexpr size_t dim       = 2;
+    static constexpr size_t noise_dim = 2; // → usa EM_step (matriz d×m)
+
+    float alpha  = 1.1f;  // natalidad de presas
+    float beta   = 0.4f;  // éxito de caza
+    float delta  = 0.1f;  // eficiencia alimenticia
+    float gamma  = 0.4f;  // mortalidad del depredador
+    float sigma1 = 0.10f; // ruido ambiental en presas
+    float sigma2 = 0.10f; // ruido ambiental en depredadores
+
+    enum { PRESA, DEPREDADOR };
+
+    void drift(const std::array<float, dim>& x,
+               float /*t*/,
+               std::array<float, dim>& out) const
+    {
+        out[PRESA]      = x[PRESA]      * (alpha - beta  * x[DEPREDADOR]);
+        out[DEPREDADOR] = x[DEPREDADOR] * (delta * x[PRESA] - gamma);
+    }
+
+    // Matriz de difusión B (d × m) = (2 × 2), diagonal
+    void diffusion(const std::array<float, dim>& x,
+                   float /*t*/,
+                   std::array<std::array<float, noise_dim>, dim>& out) const
+    {
+        out[PRESA]     [0] = sigma1 * x[PRESA];      out[PRESA]     [1] = 0.0f;
+        out[DEPREDADOR][0] = 0.0f;                    out[DEPREDADOR][1] = sigma2 * x[DEPREDADOR];
+    }
+};
+
+
+
+
+} // namespace mod
+} // namespace dsv
+#endif // ECOLOGY_HPP

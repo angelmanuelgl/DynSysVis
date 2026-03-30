@@ -250,44 +250,30 @@ private:
     static constexpr float RADIO_BARRA = 4.f;
 };
 
+
 // ════════════════════════════════════════════════════════════════
 //  TOGGLE
-//  usa RectanguloRedondeado, regenera al cambiar estado o hover
 // ════════════════════════════════════════════════════════════════
 class CampoToggleTexto : public Campo {
 public:
-    CampoToggleTexto(const std::string& etiqueta, bool* ptrEstado, 
-                const std::string txtOn , const std::string txtOff )
-        : nombre(etiqueta), estado(ptrEstado), labelOn(txtOn), labelOff(txtOff) {
+    CampoToggleTexto(const std::string& etiqueta,
+                     bool*              ptrEstado,
+                     const std::string& txtOn,
+                     const std::string& txtOff,
+                     sf::Color          colorOn     = Color::azul,
+                     sf::Color          colorOff    = Color::fondo_panel,
+                     sf::Color          colorBorde  = Color::gris_oscuro)
+        : nombre(etiqueta), estado(ptrEstado),
+          labelOn(txtOn), labelOff(txtOff),
+          colorOn(colorOn), colorOff(colorOff), colorBorde(colorBorde)
+    {
         regenerar();
     }
 
-    void draw(sf::RenderWindow& window, sf::Vector2f pos, float altoFila, const sf::Font& fuente) override {
-        posActual = pos;
-        float xToggle = pos.x + CampoMetrics::PAD + nombre.size() * CampoMetrics::CHAR_W + CampoMetrics::PAD;
-        float cy = pos.y + altoFila * 0.5f;
-
-        // 1. Dibujar Etiqueta del campo
-        dibujarTexto(window, nombre , {pos.x + CampoMetrics::PAD, pos.y}, altoFila, fuente, Color::gris_claro);
-
-        // 2. Dibujar el Botón (Marco)
-        sf::Transform tf;
-        tf.translate(xToggle, cy - ALTO_TOGGLE * 0.5f);
-        
-        if (*estado) marcoOn.draw(window, tf);
-        else if (enHover) marcoHover.draw(window, tf);
-        else marcoOff.draw(window, tf);
-
-        // 3. Dibujar Texto Interno (Centrado)
-        sf::Text t(*estado ? labelOn : labelOff, fuente, 11u);
-        auto b = t.getLocalBounds();
-        t.setOrigin(b.width / 2.f, b.height / 2.f);
-        t.setPosition(xToggle + ANCHO_TOGGLE / 2.f, cy - 2.f);
-        window.draw(t);
-    }
-
-    void onMousePress(sf::Vector2f mp) override { if(hitTest(mp)) *estado = !(*estado); }
-    void onMouseMove(sf::Vector2f mp) override { enHover = hitTest(mp); }
+    // setters — todos llaman regenerar()
+    void setColorOn   (sf::Color c) { colorOn    = c; regenerar(); }
+    void setColorOff  (sf::Color c) { colorOff   = c; regenerar(); }
+    void setColorBorde(sf::Color c) { colorBorde = c; regenerar(); }
 
     float getAncho() const override {
         return CampoMetrics::PAD
@@ -296,93 +282,255 @@ public:
              + ANCHO_TOGGLE + CampoMetrics::PAD;
     }
     float getAlto() const override { return CampoMetrics::ALTO_FILA; }
+
+    void draw(sf::RenderWindow& window, sf::Vector2f pos,
+              float altoFila, const sf::Font& fuente) override
+    {
+        posActual = pos;
+        float xToggle = pos.x + CampoMetrics::PAD
+                      + nombre.size() * CampoMetrics::CHAR_W
+                      + CampoMetrics::PAD;
+        float cy = pos.y + altoFila * 0.5f;
+
+        dibujarTexto(window, nombre,
+                     {pos.x + CampoMetrics::PAD, pos.y},
+                     altoFila, fuente, Color::gris_claro);
+
+        sf::Transform tf;
+        tf.translate(xToggle, cy - ALTO_TOGGLE * 0.5f);
+
+        // misma logica que el boton: press > hover > estado
+        if      (*estado && enHover) marcoOnHover .draw(window, tf);
+        else if (*estado)            marcoOn      .draw(window, tf);
+        else if (enHover)            marcoOffHover.draw(window, tf);
+        else                         marcoOff     .draw(window, tf);
+
+        // texto centrado dentro del toggle
+        sf::Text t;
+        t.setFont(fuente);
+        t.setCharacterSize(11u);
+        t.setFillColor(sf::Color::White);
+        t.setString(*estado ? labelOn : labelOff);
+        auto b = t.getLocalBounds();
+        t.setOrigin(b.width * 0.5f, b.height * 0.5f);
+        t.setPosition(xToggle + ANCHO_TOGGLE * 0.5f, cy - 1.f);
+        window.draw(t);
+    }
+
+    void onMouseMove (sf::Vector2f mp) override {
+        bool h = hitTest(mp);
+        if(h != enHover) { enHover = h; }  // solo regeneramos si cambia
+    }
+    void onMousePress(sf::Vector2f mp) override {
+        if(hitTest(mp)) *estado = !(*estado);
+    }
+
 private:
     bool hitTest(sf::Vector2f mp) const {
-        float x = posActual.x + CampoMetrics::PAD + nombre.size() * CampoMetrics::CHAR_W + CampoMetrics::PAD;
-        return sf::FloatRect(x, posActual.y, ANCHO_TOGGLE, CampoMetrics::ALTO_FILA).contains(mp);
+        float x = posActual.x + CampoMetrics::PAD
+                + nombre.size() * CampoMetrics::CHAR_W
+                + CampoMetrics::PAD;
+        return sf::FloatRect(x, posActual.y,
+                             ANCHO_TOGGLE,
+                             CampoMetrics::ALTO_FILA).contains(mp);
     }
 
     void regenerar() {
-        sf::Vector2f sz = { ANCHO_TOGGLE, ALTO_TOGGLE };
-        marcoOn.generar(sz, 4.f, Color::azul, Color::gris_oscuro, 1.f);
-        marcoOff.generar(sz, 4.f, Color::fondo_panel, Color::gris_oscuro, 1.f);
-        marcoHover.generar(sz, 4.f, Color::fondo_panel, Color::blanco, 1.5f);
+        sf::Vector2f sz   = { ANCHO_TOGGLE, ALTO_TOGGLE };
+        float        r    = 4.f;
+
+        // ON normal
+        marcoOn.generar(sz, r,
+            colorOn,
+            aclarar(colorOn, 40),        // borde mas claro que el fondo
+            CampoMetrics::GROSOR_BORDE_NORMAL);
+
+        // ON + hover: borde blanco y fondo un poco mas claro
+        marcoOnHover.generar(sz, r,
+            aclarar(colorOn, 25),
+            Color::blanco,
+            CampoMetrics::GROSOR_BORDE_HOVER);
+
+        // OFF normal
+        marcoOff.generar(sz, r,
+            colorOff,
+            colorBorde,
+            CampoMetrics::GROSOR_BORDE_NORMAL);
+
+        // OFF + hover: mismo fondo, borde blanco y mas grueso
+        marcoOffHover.generar(sz, r,
+            aclarar(colorOff, 20),
+            Color::blanco,
+            CampoMetrics::GROSOR_BORDE_HOVER);
     }
 
-    std::string nombre;
-    bool* estado;
-    std::string labelOn, labelOff;
-    bool enHover = false;
+    // helper: aclara un color sumando delta a RGB
+    static sf::Color aclarar(sf::Color c, int delta) {
+        return sf::Color(
+            static_cast<sf::Uint8>(std::min(255, c.r + delta)),
+            static_cast<sf::Uint8>(std::min(255, c.g + delta)),
+            static_cast<sf::Uint8>(std::min(255, c.b + delta)),
+            c.a
+        );
+    }
+
+    std::string  nombre;
+    bool*        estado;
+    std::string  labelOn, labelOff;
+    sf::Color    colorOn, colorOff, colorBorde;
     sf::Vector2f posActual;
-    RectanguloRedondeado marcoOn, marcoOff, marcoHover;
+    bool         enHover = false;
+
+    // cuatro marcos: on, on+hover, off, off+hover
+    RectanguloRedondeado marcoOn;
+    RectanguloRedondeado marcoOnHover;
+    RectanguloRedondeado marcoOff;
+    RectanguloRedondeado marcoOffHover;
+
     static constexpr float ANCHO_TOGGLE = 55.f;
-    static constexpr float ALTO_TOGGLE = 18.f;
+    static constexpr float ALTO_TOGGLE  = 18.f;
 };
 
-// Este no usa texto dentro, sino que desliza un círculo (o cambia su posición) para indicar el estado. Es mucho más visual.
+
+
+// ════════════════════════════════════════════════════════════════
+//  TOGGLE TEXTO
+// ════════════════════════════════════════════════════════════════
 class CampoToggle : public Campo {
 public:
-    CampoToggle(const std::string& etiqueta, bool* ptrEstado)
-        : nombre(etiqueta), estado(ptrEstado) {
+    CampoToggle(const std::string& etiqueta,
+                bool*              ptrEstado,
+                sf::Color          colorOn    = Color::verde,
+                sf::Color          colorOff   = Color::fondo_panel,
+                sf::Color          colorBorde = Color::gris_oscuro)
+        : nombre(etiqueta), estado(ptrEstado),
+          colorOn(colorOn), colorOff(colorOff), colorBorde(colorBorde)
+    {
         regenerar();
     }
 
-    void draw(sf::RenderWindow& window, sf::Vector2f pos, float altoFila, const sf::Font& fuente) override {
-        posActual = pos;
-        float xSw = pos.x + CampoMetrics::PAD + nombre.size() * CampoMetrics::CHAR_W + CampoMetrics::PAD;
-        float cy = pos.y + altoFila * 0.5f;
+    void setColorOn   (sf::Color c) { colorOn    = c; regenerar(); }
+    void setColorOff  (sf::Color c) { colorOff   = c; regenerar(); }
+    void setColorBorde(sf::Color c) { colorBorde = c; regenerar(); }
 
-        dibujarTexto(window, nombre , {pos.x + CampoMetrics::PAD, pos.y}, altoFila, fuente, Color::gris_claro);
-
-        // 1. Dibujar el Fondo (Óvalo/Cápsula)
-        sf::Transform tf;
-        tf.translate(xSw, cy - ALTO_SWITCH * 0.5f);
-        if (*estado) marcoOn.draw(window, tf); else marcoOff.draw(window, tf);
-
-        // 2. Dibujar el Círculo (Handle)
-        sf::CircleShape circle(ALTO_SWITCH * 0.4f);
-        circle.setOrigin(circle.getRadius(), circle.getRadius());
-        circle.setFillColor(sf::Color::White);
-        
-        // Posición del círculo: a la izquierda si off, a la derecha si on
-        float offset = *estado ? (ANCHO_SWITCH - circle.getRadius() - 4.f) : (circle.getRadius() + 4.f);
-        circle.setPosition(xSw + offset, cy);
-        
-        if (enHover) circle.setOutlineThickness(1.5f), circle.setOutlineColor(Color::azul);
-        window.draw(circle);
-    }
-
-    void onMousePress(sf::Vector2f mp) override { if(hitTest(mp)) *estado = !(*estado); }
-    void onMouseMove(sf::Vector2f mp) override { enHover = hitTest(mp); }
-        float getAncho() const override {
+    float getAncho() const override {
         return CampoMetrics::PAD
              + nombre.size() * CampoMetrics::CHAR_W
              + CampoMetrics::PAD
              + ANCHO_SWITCH + CampoMetrics::PAD;
     }
     float getAlto() const override { return CampoMetrics::ALTO_FILA; }
+
+    void draw(sf::RenderWindow& window, sf::Vector2f pos,
+              float altoFila, const sf::Font& fuente) override
+    {
+        posActual = pos;
+        float xSw = pos.x + CampoMetrics::PAD
+                  + nombre.size() * CampoMetrics::CHAR_W
+                  + CampoMetrics::PAD;
+        float cy = pos.y + altoFila * 0.5f;
+
+        dibujarTexto(window, nombre,
+                     {pos.x + CampoMetrics::PAD, pos.y},
+                     altoFila, fuente, Color::gris_claro);
+
+        sf::Transform tf;
+        tf.translate(xSw, cy - ALTO_SWITCH * 0.5f);
+
+        // capsula de fondo — cuatro estados igual que ToggleTexto
+        if      (*estado && enHover) marcoOnHover .draw(window, tf);
+        else if (*estado)            marcoOn      .draw(window, tf);
+        else if (enHover)            marcoOffHover.draw(window, tf);
+        else                         marcoOff     .draw(window, tf);
+
+        // circulo deslizante
+        // cuando esta ON va a la derecha, OFF a la izquierda
+        float radioCirculo = ALTO_SWITCH * 0.38f;
+        float xOff = xSw + radioCirculo + 3.f;
+        float xOn  = xSw + ANCHO_SWITCH - radioCirculo - 3.f;
+        float xCirculo = *estado ? xOn : xOff;
+
+        // el circulo usa el generador que ya tenemos
+        float diametro = radioCirculo * 2.f;
+        sf::Color colorCirculo = enHover ? Color::gris_claro : Color::blanco;
+        auto circulo = generarRectanguloRelleno(
+            {diametro, diametro},
+            radioCirculo,   // radio = la mitad = circulo perfecto
+            24,
+            colorCirculo
+        );
+
+        sf::Transform tfCirculo;
+        tfCirculo.translate(xCirculo - radioCirculo, cy - radioCirculo);
+        window.draw(circulo, tfCirculo);
+    }
+
+    void onMouseMove (sf::Vector2f mp) override {
+        bool h = hitTest(mp);
+        if(h != enHover) { enHover = h; }
+    }
+    void onMousePress(sf::Vector2f mp) override {
+        if(hitTest(mp)) *estado = !(*estado);
+    }
+
 private:
     bool hitTest(sf::Vector2f mp) const {
-        float x = posActual.x + CampoMetrics::PAD + nombre.size() * CampoMetrics::CHAR_W + CampoMetrics::PAD;
-        return sf::FloatRect(x, posActual.y, ANCHO_SWITCH, CampoMetrics::ALTO_FILA).contains(mp);
+        float x = posActual.x + CampoMetrics::PAD
+                + nombre.size() * CampoMetrics::CHAR_W
+                + CampoMetrics::PAD;
+        return sf::FloatRect(x, posActual.y,
+                             ANCHO_SWITCH,
+                             CampoMetrics::ALTO_FILA).contains(mp);
     }
 
     void regenerar() {
-        sf::Vector2f sz = { ANCHO_SWITCH, ALTO_SWITCH };
-        float radioMax = ALTO_SWITCH / 2.f; // Hace que sea un óvalo perfecto
-        marcoOn.generar(sz, radioMax, Color::verde, Color::gris_oscuro, 1.f);
-        marcoOff.generar(sz, radioMax, sf::Color(60,60,60), Color::gris_oscuro, 1.f);
+        float        radioMax = ALTO_SWITCH * 0.5f;  // capsula perfecta
+        sf::Vector2f sz       = { ANCHO_SWITCH, ALTO_SWITCH };
+
+        marcoOn.generar(sz, radioMax,
+            colorOn,
+            aclarar(colorOn, 40),
+            CampoMetrics::GROSOR_BORDE_NORMAL);
+
+        marcoOnHover.generar(sz, radioMax,
+            aclarar(colorOn, 25),
+            Color::blanco,
+            CampoMetrics::GROSOR_BORDE_HOVER);
+
+        marcoOff.generar(sz, radioMax,
+            colorOff,
+            colorBorde,
+            CampoMetrics::GROSOR_BORDE_NORMAL);
+
+        marcoOffHover.generar(sz, radioMax,
+            aclarar(colorOff, 20),
+            Color::blanco,
+            CampoMetrics::GROSOR_BORDE_HOVER);
     }
 
-    std::string nombre;
-    bool* estado;
-    bool enHover = false;
+    static sf::Color aclarar(sf::Color c, int delta) {
+        return sf::Color(
+            static_cast<sf::Uint8>(std::min(255, c.r + delta)),
+            static_cast<sf::Uint8>(std::min(255, c.g + delta)),
+            static_cast<sf::Uint8>(std::min(255, c.b + delta)),
+            c.a
+        );
+    }
+
+    std::string  nombre;
+    bool*        estado;
+    sf::Color    colorOn, colorOff, colorBorde;
     sf::Vector2f posActual;
-    RectanguloRedondeado marcoOn, marcoOff;
+    bool         enHover = false;
+
+    RectanguloRedondeado marcoOn;
+    RectanguloRedondeado marcoOnHover;
+    RectanguloRedondeado marcoOff;
+    RectanguloRedondeado marcoOffHover;
+
     static constexpr float ANCHO_SWITCH = 36.f;
     static constexpr float ALTO_SWITCH  = 18.f;
 };
-
 
 // ════════════════════════════════════════════════════════════════
 //  BOTON
