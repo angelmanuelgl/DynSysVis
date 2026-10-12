@@ -43,7 +43,7 @@ Está diseñada para integrarse fácilmente en simulaciones complejas, permitien
 <img src="./imagenes/SpatialBranchingProcess.gif" width="300">
 
 
-## MAS Ejemplos de Uso: 
+#mAS Ejemplos de Uso: 
 
 
 **ECUACIONES DIFERENCIALES ORDINARIAS (EDOS)** 
@@ -86,31 +86,67 @@ F* nanzas Cuantitativas: Modelado de caminatas aleatorias o movimiento browniano
 
 ### Usando MakeFIle
 
-Para faciliatar esto puedes usar makefile, solo asegurate de tener instalado ``pacman -S mingw-w64-ucrt-x86_64-make``
+Para faciliatar esto puedes usar makefile, solo asegurate de tener instalado ``pacman -S mingw-w64-ucrt-x86_64-make`` o bien 
+```
+brew install make
+```
 
-Una vez que ejecutas ``mingw32-make`` dentro de DynSysVis, se genera el archivo lib/libDynSysVis.a
-Para usar el modo log usar ``mingw32-make LOG=1 ``
+Importante tener instalado SFML
+```
+brew install sfml@2
+```
 
-Yo me encargo de que el makefile siempre funcione apesar de los cambios en carpetas y etc
+Compilar la libreria
+```
+cd DynSysVis
+gmake clean
+gmake all
+cd ..
+```
+Hay dos makefile uno para windows y otro para linux/macOs
 
+Para probar los ejemplos
 luego compilar  proyectos con
-```
-mingw32-make run APP=apps/ejemplos/hormigas.cpp
-```
 
 ```
-mingw32-make run APP=apps/pendulo/pendulo.cpp
-mingw32-make run APP=apps/pendulo/penduloOld.cpp
-mingw32-make run APP=apps/pendulo/penduloFase.cpp
+mingw32-make run APP=01Epodemiology\SEIR.cpp
+mingw32-make run APP=01Epodemiology\SEIARD.cpp
 
-mingw32-make run APP=apps/hormigas/main.cpp
-mingw32-make run APP=apps/hormigas/hormigasFase.cpp
+mingw32-make run APP=02Ecology\hormigas.cpp
+mingw32-make run APP=02Ecology\hormigasFase.cpp
+mingw32-make run APP=02Ecology\Growth_MaltusLogistico.cpp
+mingw32-make run APP=02Ecology\tortugas.cpp
+mingw32-make run APP=02Ecology\LotkaVolterra.cpp
 
-mingw32-make run APP=apps/pruebasFast/pruebas.cpp
+mingw32-make run APP=03Physics\pendulum.cpp
+mingw32-make run APP=03Physics\doublePendulum.cpp
+mingw32-make run APP=03Physics\LorenzAnterior.cpp
+mingw32-make run APP=03Physics\chua.cpp
+mingw32-make run APP=03Physics\rossler.cpp
+mingw32-make run APP=03Physics\lorenz.cpp
 
-mingw32-make run APP=apps/mix/lor.cpp
-mingw32-make run APP=apps/mix/sir.cpp
+mingw32-make run APP=05Finanzas\mixSDE.cpp
 ```
 
+o bien
+```
+gmake run APP=01Epodemiology/SEIR.cpp
+gmake run APP=01Epodemiology/SEIARD.cpp
+
+gmake run APP=02Ecology/hormigas.cpp
+gmake run APP=02Ecology/hormigasFase.cpp
+gmake run APP=02Ecology/Growth_MaltusLogistico.cpp
+gmake run APP=02Ecology/tortugas.cpp
+gmake run APP=02Ecology/LotkaVolterra.cpp
+
+gmake run APP=03Physics/pendulum.cpp
+gmake run APP=03Physics/doublePendulum.cpp
+gmake run APP=03Physics/LorenzAnterior.cpp
+gmake run APP=03Physics/chua.cpp
+gmake run APP=03Physics/rossler.cpp
+gmake run APP=03Physics/lorenz.cpp
+
+gmake run APP=05Finanzas\mixSDE.cpp
+```
 
 ## algunas visualizaciones externas

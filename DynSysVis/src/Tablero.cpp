@@ -18,7 +18,7 @@
     -> posciion
 */
 
-
+#include <sstream> 
 #include "dsv/interface/Tablero.hpp"
 
 

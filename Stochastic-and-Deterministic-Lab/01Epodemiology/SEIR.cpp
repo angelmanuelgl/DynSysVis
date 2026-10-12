@@ -24,7 +24,7 @@ int main() {
     // ── Inicializacion ────────────────────────────────────────────────────────
     dsv::Color::cargar("assets/config/colores.txt");
     sf::RenderWindow window;
-    dsv::Sistema::inicializarVentana(window, "DynSysVis RT — Modelo SEIR");
+    dsv::Sistema::inicializarVentana(window, "DynSysVis RT Modelo SEIR");
 
 
     // ── Modelo ────────────────────────────────────────────────────────────────
