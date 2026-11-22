@@ -12,7 +12,11 @@ build/
 .pruebasFast/
 
 # archivos temporales o antiguos
+*.tmp
 
+# Ignorar el script de recorte
+recortar.sh
 
-
-
+# Ignorar archivos de video pesados
+*.mov
+*.mp4
