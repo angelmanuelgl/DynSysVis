@@ -187,7 +187,7 @@ inline std::mt19937& default_rng() {
         constexpr size_t m = Model::noise_dim;
 
         std::array<State, d> det_part;
-        std::array<std::array<State, m>, d> eps;
+        std::array<State, m> eps;
         std::array<State, d> stoch_part;
 
         const auto& model = sys.getModel();

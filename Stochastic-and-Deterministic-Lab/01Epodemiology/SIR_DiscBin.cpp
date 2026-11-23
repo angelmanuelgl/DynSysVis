@@ -256,7 +256,7 @@ int main() {
     sf::Clock clock;
     sf::Time  accumulator = sf::Time::Zero;
     // Cada "tick" del acumulador = 1 paso discreto (1 dia).
-    sf::Time  ups = sf::seconds(0.5f);
+    sf::Time  ups = sf::seconds(0.3f);
 
     while (window.isOpen()) {
 

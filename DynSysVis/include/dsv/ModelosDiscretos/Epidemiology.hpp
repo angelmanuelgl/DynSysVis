@@ -76,7 +76,7 @@ struct SIR_Binomial_Model {
     void epsilon(const std::array<state_type, dim>& x,
                  time_type n,
                  std::mt19937& rng,
-                 std::array<std::array<state_type, noise_dim>, dim>& eps_out) const
+                 std::array<state_type, noise_dim>& eps_out) const
     {
         eps_out = {}; // Limpiar matriz
 
@@ -90,18 +90,18 @@ struct SIR_Binomial_Model {
         std::binomial_distribution<int> dist_rec(ensayos_I, p_n);
 
         // Guardamos ε_1 en [0][0] y ε_2 en [0][1]
-        eps_out[0][0] = static_cast<state_type>(dist_inf(rng)); // ε_1
-        eps_out[0][1] = static_cast<state_type>(dist_rec(rng)); // ε_2
+        eps_out[0] = static_cast<state_type>(dist_inf(rng)); // ε_1
+        eps_out[1] = static_cast<state_type>(dist_rec(rng)); // ε_2
     }
 
     // 3. Flujo neto entre compartimentos: [-ε_1, +ε_1 - ε_2, +ε_2]
     void diffusion(const std::array<state_type, dim>& /*x*/,
                    time_type /*n*/,
-                   const std::array<std::array<state_type, noise_dim>, dim>& eps,
+                   std::array<state_type, noise_dim>& eps,
                    std::array<state_type, dim>& out) const
     {
-        state_type eps_1 = eps[0][0];
-        state_type eps_2 = eps[0][1];
+        state_type eps_1 = eps[0];
+        state_type eps_2 = eps[1];
 
         out[S] = -eps_1;
         out[I] =  eps_1 - eps_2;
