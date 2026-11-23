@@ -4,12 +4,26 @@
 #include <random>
 #include "dsv/core/Logger.hpp"
 
+
+
+
 namespace dsv {
 namespace sim {
+
+inline std::mt19937& default_rng() {
+    static thread_local std::mt19937 gen(std::random_device{}());
+    return gen;
+}
+
+// --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+// tiempo continuo: EDO y EDE
+// Ecuacion Diferenciales Ordinarias (ODE) y Estocásticas (SDE)
+// --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
     // --- --- ODE --- --- 
     // EULER
     template<typename Instance>
-    void E_step(Instance& sys, float dt) {
+    void E_step(Instance& sys, float dt ){
         using Model = typename std::decay<decltype(sys.getModel())>::type;
         constexpr size_t d = Model::dim;
 
@@ -25,8 +39,9 @@ namespace sim {
     // --- --- SDE --- --- 
     //  Euler-Maruyama un ruido
     template<typename Instance>
-    void EM_step_simple(Instance& sys, float dt) {
-        using Model = typename std::decay<decltype(sys.getModel())>::type;
+    void EM_step_simple(Instance& sys, typename Instance::time_type dt, std::mt19937& rng = default_rng()) {
+        using Model = typename Instance::model_type;
+        using Real  = typename Instance::state_type;
         constexpr size_t d = Model::dim;
 
         std::array<float, d> a;
@@ -36,7 +51,7 @@ namespace sim {
         sys.getModel().diffusion(sys.state, sys.t, g);
 
         static std::mt19937 gen(std::random_device{}());
-        static std::normal_distribution<float> dist(0.0f, 1.0f);
+        std::normal_distribution<Real> dist(Real(0), Real(1));
         float dW = dist(gen) * std::sqrt(dt);
 
         for(size_t i = 0; i < d; ++i) {
@@ -47,9 +62,10 @@ namespace sim {
 
     //  Euler-Maruyama un m ruidos Independiente
     template<typename Instance>
-    void EM_step(Instance& sys, float dt)
+    void EM_step(Instance& sys, float dt, std::mt19937& rng = default_rng() )
     {
-        using Model = typename std::decay<decltype(sys.getModel())>::type;
+        using Model = typename Instance::model_type;
+        using Real  = typename Instance::state_type;
 
         constexpr size_t d = Model::dim;
         constexpr size_t m = Model::noise_dim;
@@ -62,14 +78,14 @@ namespace sim {
         sys.getModel().diffusion(sys.state, sys.t, B);
 
         static std::mt19937 gen(std::random_device{}());
-        static std::normal_distribution<float> dist(0.0f, 1.0f);
+        static std::normal_distribution<Real> dist(Real(0), Real(1));
 
         for(size_t k = 0; k < m; ++k)
             dW[k] = dist(gen) * std::sqrt(dt);
 
         for(size_t i = 0; i < d; ++i)
         {
-            float stochastic = 0.0f;
+            Real stochastic = Real(0);
             for(size_t k = 0; k < m; ++k)
                 stochastic += B[i][k] * dW[k];
 
@@ -79,61 +95,74 @@ namespace sim {
         sys.t += dt;
     }
 
-    // GENERAL
+    // GENERAL //. Para modelos CONTINUOS (EDOs y SDEs): requiere dt
     template<typename Instance>
-    void step(Instance& sys, float dt) {
-        using Model = typename std::decay<decltype(sys.getModel())>::type;
-        
-        // dim = 0//  determinista
+    void step(Instance& sys, typename Instance::time_type dt, std::mt19937& rng = default_rng() )
+    {
+        using Model = typename std::decay_t<decltype(sys.getModel())>;
+
         if constexpr (Model::noise_dim == 0) {
-            E_step(sys, dt);
-        } 
-        // dim = 1// simple
-        else if constexpr (Model::noise_dim == 1) {
-            EM_step_simple(sys, dt);
+            E_step(sys, dt); // O RK4_step(sys, dt)
         }
-        // n x m matriz
+        else if constexpr (Model::noise_dim == 1) {
+            EM_step_simple(sys, dt, rng);
+        }
         else {
-            EM_step(sys, dt); 
+            EM_step(sys, dt, rng);
         }
     }
 
     // --- --- ODE --- --- 
     // Runge-Kutta 4to Orden (RK4)
     template<typename Instance>
-    void RK4_step(Instance& sys, float dt) {
-        using Model = typename std::decay<decltype(sys.getModel())>::type;
+    void RK4_step(Instance& sys, typename Instance::time_type dt )
+    {
+        using Model = typename Instance::model_type;
+        using Real  = typename Instance::state_type;
+        using Time  = typename Instance::time_type;
         constexpr size_t d = Model::dim;
 
         // Estructuras para las 4 etapas
-        std::array<float, d> k1, k2, k3, k4;
-        std::array<float, d> temp_state;
+        std::array<Real, d> k1, k2, k3, k4;
+        std::array<Real, d> temp_state;
 
-        float h = dt;
-        float h2 = h / 2.0f;
+        const Time h  = dt;
+        const Time h2 = h / Time(2);
+        const Time h6 = h / Time(6);
 
         // k1 = f(t, x)
         sys.getModel().drift(sys.state, sys.t, k1);
 
         // k2 = f(t + h/2, x + h/2 * k1)
-        for(size_t i = 0; i < d; ++i) temp_state[i] = sys.state[i] + h2 * k1[i];
+        for(size_t i = 0; i < d; ++i) 
+            temp_state[i] = sys.state[i] + static_cast<Real>(h2)* k1[i];
         sys.getModel().drift(temp_state, sys.t + h2, k2);
 
         // k3 = f(t + h/2, x + h/2 * k2)
-        for(size_t i = 0; i < d; ++i) temp_state[i] = sys.state[i] + h2 * k2[i];
+        for(size_t i = 0; i < d; ++i) 
+            temp_state[i] = sys.state[i] + static_cast<Real>(h2) * k2[i];
         sys.getModel().drift(temp_state, sys.t + h2, k3);
 
         // k4 = f(t + h, x + h * k3)
-        for(size_t i = 0; i < d; ++i) temp_state[i] = sys.state[i] + h * k3[i];
+        for(size_t i = 0; i < d; ++i)
+             temp_state[i] = sys.state[i] + static_cast<Real>(h) * k3[i];
         sys.getModel().drift(temp_state, sys.t + h, k4);
 
         // actualizacion final: x = x + (h/6) * (k1 + 2k2 + 2k3 + k4)
         for(size_t i = 0; i < d; ++i) {
-            sys.state[i] += (h / 6.0f) * (k1[i] + 2.0f * k2[i] + 2.0f * k3[i] + k4[i]);
+            sys.state[i] += h6 * (k1[i] + Real(2) * k2[i] + Real(2) * k3[i] + k4[i]);
         }
         
         sys.t += h;
     }
+
+
+// --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+// tiempo discreto
+// Ecuacion en Diferencias (Ec en Dif) y Estocásticas (Ec en Dif Estocásticas)
+// --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
 
 } // namespace sim
 } // namespace dsv
