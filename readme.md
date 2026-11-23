@@ -132,6 +132,7 @@ o bien
 ```
 gmake run APP=01Epodemiology/SEIR.cpp
 gmake run APP=01Epodemiology/SEIARD.cpp
+gmake run APP=01Epodemiology/SIR_DiscBin.cpp
 
 gmake run APP=02Ecology/hormigas.cpp
 gmake run APP=02Ecology/hormigasFase.cpp

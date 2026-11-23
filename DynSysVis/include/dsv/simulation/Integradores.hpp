@@ -95,7 +95,7 @@ inline std::mt19937& default_rng() {
         sys.t += dt;
     }
 
-    // GENERAL //. Para modelos CONTINUOS (EDOs y SDEs): requiere dt
+    // GENERAL // Para modelos CONTINUOS (EDOs y SDEs): requiere dt
     template<typename Instance>
     void step(Instance& sys, typename Instance::time_type dt, std::mt19937& rng = default_rng() )
     {
@@ -162,6 +162,56 @@ inline std::mt19937& default_rng() {
 // Ecuacion en Diferencias (Ec en Dif) y Estocásticas (Ec en Dif Estocásticas)
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
+    // ecuaciones en diferencias
+    template<typename Instance>
+    void EcEnDif_step(Instance& sys) {
+        using Model = typename Instance::model_type;
+        using State = typename Instance::state_type;
+        constexpr size_t d = Model::dim;
+
+        // Importante: escribir en 'next' para no sobrescribir sys.state a mitad del cálculo
+        std::array<State, d> next;
+        sys.getModel().drift(sys.state, sys.t, next);
+
+        sys.state = next;
+        sys.t += 1;
+    }
+
+    // Ecuacion en dIferencias Estocastica
+    //    x_{n+1} = drift(x_n, n) + diffusion(x_n, n, epsilon(x_n, n))
+    template<typename Instance>
+    void EcEnDifEstoc_step(Instance& sys, std::mt19937& rng = default_rng()) {
+        using Model = typename Instance::model_type;
+        using State = typename Instance::state_type;
+        constexpr size_t d = Model::dim;
+        constexpr size_t m = Model::noise_dim;
+
+        std::array<State, d> det_part;
+        std::array<std::array<State, m>, d> eps;
+        std::array<State, d> stoch_part;
+
+        const auto& model = sys.getModel();
+        model.drift(sys.state, sys.t, det_part);
+        model.epsilon(sys.state, sys.t, rng, eps);
+        model.diffusion(sys.state, sys.t, eps, stoch_part);
+
+        for (size_t i = 0; i < d; ++i)
+            sys.state[i] = det_part[i] + stoch_part[i];
+
+        sys.t += 1;
+    }
+
+    // general: para modelos discretos (Ec en Dif y Ec en Dif Estocásticas): no requiere dt
+    template<typename Instance>
+    void step(Instance& sys, std::mt19937& rng = default_rng()) {
+        using Model = typename Instance::model_type;
+        
+        if constexpr (Model::noise_dim == 0) {
+            EcEnDif_step(sys);
+        } else {
+            EcEnDifEstoc_step(sys, rng);
+        }
+    }
 
 
 } // namespace sim

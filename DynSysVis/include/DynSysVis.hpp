@@ -65,4 +65,6 @@
 #include "dsv/Modelos/FisicaEstadistica.hpp"
 #include "dsv/Modelos/GrowthModels.hpp"
 #include "dsv/Modelos/Mechanics.hpp"
+
+#include "dsv/ModelosDiscretos/Epidemiology.hpp"
 #endif

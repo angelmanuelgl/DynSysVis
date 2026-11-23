@@ -31,29 +31,38 @@ struct Model {
 };
 // el integrador hacer drift() * dt + diffusion() * dW
 */
-/* modelo tiempo discreto generico: 
-// puedes cambiar float por double, o incluos por int si tu estado siempre es entero
+
+
+/* --- --- modelo tiempo discreto generico:  --- --- 
+
 template<typename type = float>
-struct Model {
-    static constexpr size_t dim       = 1;
-    static constexpr size_t noise_dim = 1;
-    void drift(const std::array<type, dim>& x,
-               int t,
-               std::array<type, dim>& out) const
-    {
-    }
-    void epsilon( const std::array<type, dim>& x,
-               int t,
-               std::array<std::array<type, noise_dim>, dim>& out) const
-    {    
-    }
-    void diffusion(const std::array<type, dim>& x,
-                   int t,
-                   std::array<std::array<type, noise_dim>, dim>& out, 
-                   std::array<type, dim>& out) const
-    {              
-    }
+template<typename Type = float>
+struct DiscreteStochasticModel {
+    using state_type = Type;
+    using time_type  = int;
+
+    static constexpr bool   is_discrete = true; // Activa el integrador discreto
+    static constexpr size_t dim         = 1;
+    static constexpr size_t noise_dim   = 1;
+
+    //  Parte determinista: f(x_n, n)
+    void drift(const std::array<state_type, dim>& x,
+               time_type n,
+               std::array<state_type, dim>& out) const;
+
+    // Generación de innovación estocástica: \xi_{n+1}
+    void epsilon(const std::array<state_type, dim>& x,
+                 time_type n,
+                 std::mt19937& rng,
+                 std::array<std::array<state_type, noise_dim>, dim>& eps_out) const;
+
+    // Impacto del ruido: g(x_n, n, \xi_{n+1})
+    void diffusion(const std::array<state_type, dim>& x,
+                   time_type n,
+                   const std::array<std::array<state_type, noise_dim>, dim>& eps,
+                   std::array<state_type, dim>& out) const;
 };
+
 // el integrador hacer drift(x,t) + diffusion(x,t, epsilon(x,t))  
 */
 
